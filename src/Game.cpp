@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <SDL.h>
+#include <SDL_image.h>
 #include <iostream>
 
 void Game::Initialize()
@@ -10,8 +11,9 @@ void Game::Initialize()
 		return;
 	}
 
-	if (SDLParameters.WindowedMode == DisplayParameters::EWindowedMode::Fullscreen)
+	if (SDLParameters.WindowedMode == DisplayParameters::EWindowedMode::FullscreenMaxRes)
 	{
+		// For maximum possible resolution settings, query the display to find its dimensions
 		SDL_DisplayMode displayMode;
 		SDL_GetCurrentDisplayMode(0, &displayMode); // Only getting 0th display for now
 
@@ -47,7 +49,8 @@ void Game::Initialize()
 		return;
 	}
 
-	if (SDLParameters.WindowedMode == DisplayParameters::EWindowedMode::Fullscreen)
+	if (SDLParameters.WindowedMode == DisplayParameters::EWindowedMode::FullscreenMaxRes ||
+		SDLParameters.WindowedMode == DisplayParameters::EWindowedMode::FullscreenOtherRes)
 	{
 		SDL_SetWindowFullscreen(SDLWindow, SDL_WINDOW_FULLSCREEN);
 	}
@@ -71,6 +74,9 @@ void Game::Destroy()
 	SDL_DestroyRenderer(SDLRenderer);
 	SDL_DestroyWindow(SDLWindow);
 	SDL_Quit();
+
+	SDLWindow = nullptr;
+	SDLRenderer = nullptr;
 }
 
 void Game::Setup()
@@ -110,6 +116,28 @@ void Game::Render()
 	SDL_SetRenderDrawColor(SDLRenderer, 20, 20, 20, 255);
 	SDL_RenderClear(SDLRenderer);
 
+	auto testAssetPath = AssetPath + "images/tank-tiger-right.png";
+
+	if (SDL_Surface* surface = IMG_Load(testAssetPath.c_str()))
+	{
+		if (SDL_Texture* texture = SDL_CreateTextureFromSurface(SDLRenderer, surface))
+		{
+			SDL_FreeSurface(surface);
+			SDL_Rect dstRect{ 10, 10, 32, 32 };
+			SDL_RenderCopy(SDLRenderer, texture, nullptr, &dstRect);
+			SDL_DestroyTexture(texture);
+		}
+	}
+	else
+	{
+		std::cerr << "Error rendering asset at " << testAssetPath;
+	}
+
 	SDL_RenderPresent(SDLRenderer);
+}
+
+void Game::SetAssetPath(std::string newAssetPath)
+{
+	AssetPath = newAssetPath;
 }
 

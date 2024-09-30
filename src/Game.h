@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -10,14 +11,17 @@ struct SDL_Renderer;
 struct DisplayParameters
 {
 	enum class EWindowedMode {
-		Fullscreen = 0,
+		FullscreenMaxRes = 0,
+		FullscreenOtherRes,
 		Windowed,
-		// TODO: others??
 	};
 
-	size_t WindowWidth = 800;
-	size_t WindowHeight = 600;
-	EWindowedMode WindowedMode = EWindowedMode::Fullscreen;
+	EWindowedMode WindowedMode = EWindowedMode::Windowed;
+
+	// If WindowedMode is FullscreenMaxRes, these will be overwritten with 
+	// the maximum values returned by a query on the display.
+	size_t WindowWidth = 1920;
+	size_t WindowHeight = 1080;
 };
 
 class Game
@@ -34,6 +38,8 @@ public:
 	void ProcessInput();
 	void Update();
 	void Render();
+	void SetAssetPath(std::string newAssetPath);
+	const std::string GetAssetPath() const { return AssetPath; }
 
 private:
 
@@ -43,4 +49,7 @@ private:
 	SDL_Window* SDLWindow = nullptr;
 	SDL_Renderer* SDLRenderer = nullptr;
 	DisplayParameters SDLParameters;
+
+	// Asset folder
+	std::string AssetPath = "./assets/";
 };

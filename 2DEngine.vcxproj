@@ -75,7 +75,7 @@
     <LibraryPath>C:\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\SDL2\include;C:\Users\seanw\source\repos\2DEngine\2DEngine\libs;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\seanw\source\repos\2DEngine\2DEngine\src;C:\SDL2\include;C:\Users\seanw\source\repos\2DEngine\2DEngine\libs;$(IncludePath)</IncludePath>
     <LibraryPath>C:\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -394,7 +394,9 @@
     <ClInclude Include="libs\sol\config.hpp" />
     <ClInclude Include="libs\sol\forward.hpp" />
     <ClInclude Include="libs\sol\sol.hpp" />
-    <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\Game\Game.h" />
+    <ClInclude Include="src\Util\CoreStatics.h" />
+    <ClInclude Include="src\Logger\Logger.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libavif-16.dll" />
@@ -553,7 +555,8 @@
     <ClCompile Include="libs\imgui\imgui_draw.cpp" />
     <ClCompile Include="libs\imgui\imgui_sdl.cpp" />
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\Game\Game.cpp" />
+    <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,7 @@
 
 namespace CoreStatics
 {
-	constexpr static bool s_IsDebugBuild = _DEBUG;
-	constexpr static float s_OneMillisec = 1.0f / 1000.0f;
+	constexpr static bool IsDebugBuild = _DEBUG;
+	constexpr static double OneMillisec = 1.0 / 1000.0;
+	constexpr static unsigned int MaxNumComponents = 32;
 } // ~namespace CoreStatics

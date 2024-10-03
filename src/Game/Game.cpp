@@ -1,9 +1,10 @@
 #include <SDL.h>
 #include <SDL_image.h>
-#include "glm/glm.hpp"
 #include "Game.h"
 #include "Util/CoreStatics.h"
 #include "Logger/Logger.h"
+#include "ECS/ECS.h"
+#include "ECS/Components/TransformComponent.h"
 
 void Game::Initialize()
 {
@@ -14,7 +15,7 @@ void Game::Initialize()
 	}
 
 	// My preference is to debug in Windowed. So I built that into the engine for now :)
-	if (CoreStatics::s_IsDebugBuild)
+	if (CoreStatics::IsDebugBuild)
 	{
 		DisplayParameters.WindowedMode = SDLParameters::EWindowedMode::Windowed;
 	}
@@ -74,15 +75,15 @@ void Game::Run()
 	{
 		ProcessInput();
 
-		// Calculate delta time in seconds
-		const unsigned MillisecsCurrentFrame = SDL_GetTicks();
-		const float deltaTime =
-			(MillisecsCurrentFrame - MillisecsPreviousFrame) * CoreStatics::s_OneMillisec;
+		// Get delta time in milliseconds
+		const unsigned MillisecsCurrentFrame = SDL_GetTicks();		
 
-		// Cache current milliseconds per frame
+		// Convert to seconds for ease of use (conceptually, things should happen "per second")
+		Update((MillisecsCurrentFrame - MillisecsPreviousFrame) * CoreStatics::OneMillisec);
+		
+		// Cache current milliseconds per frame to calculate next delta time
 		MillisecsPreviousFrame = MillisecsCurrentFrame;
 
-		Update(deltaTime);
 		Render();
 	}
 }
@@ -106,7 +107,10 @@ void Game::Play()
 
 void Game::Setup()
 {
-	// TODO setup game objects
+	// test test test
+	ECSManager GameManager;
+	auto E = GameManager.CreateEntity();
+	GameManager.AddComponent<TransformComponent>(E);
 }
 
 void Game::ProcessInput()
@@ -131,41 +135,35 @@ void Game::ProcessInput()
 	}
 }
 
-// TODO test code
-static glm::vec2 playerPosition {10.0f, 20.0f};
-static glm::vec2 playerVelocity {10.0f, 5.0f};
-
-void Game::Update(const float DeltaTime)
+void Game::Update(const double DeltaTime)
 {
-	// TODO blah blah testing blah
-	playerPosition.x += playerVelocity.x * DeltaTime;
-	playerPosition.y += playerVelocity.y * DeltaTime;
+
 }
 
 void Game::Render()
 {
-	SDL_SetRenderDrawColor(SDLRenderer, 20, 20, 20, 255);
-	SDL_RenderClear(SDLRenderer);
+	//SDL_SetRenderDrawColor(SDLRenderer, 20, 20, 20, 255);
+	//SDL_RenderClear(SDLRenderer);
 
-	SDL_Rect dstRect { static_cast<int>(playerPosition.x), static_cast<int>(playerPosition.y), 32, 32 };
+	//SDL_Rect dstRect { static_cast<int>(playerPosition.x), static_cast<int>(playerPosition.y), 32, 32 };
 
-	if (TestTexture == nullptr)
-	{
-		if (SDL_Surface* surface = IMG_Load(TestAssetPath.c_str()))
-		{
-			if (TestTexture = SDL_CreateTextureFromSurface(SDLRenderer, surface))
-			{
-				SDL_FreeSurface(surface);
-			}
-		}
-		else
-		{
-			Logger::LogError("Error rendering asset at " + TestAssetPath);
-		}
-	}
+	//if (TestTexture == nullptr)
+	//{
+	//	if (SDL_Surface* surface = IMG_Load(TestAssetPath.c_str()))
+	//	{
+	//		if (TestTexture = SDL_CreateTextureFromSurface(SDLRenderer, surface))
+	//		{
+	//			SDL_FreeSurface(surface);
+	//		}
+	//	}
+	//	else
+	//	{
+	//		Logger::LogError("Error rendering asset at " + TestAssetPath);
+	//	}
+	//}
 
-	SDL_RenderCopy(SDLRenderer, TestTexture, nullptr, &dstRect);
+	//SDL_RenderCopy(SDLRenderer, TestTexture, nullptr, &dstRect);
 
-	SDL_RenderPresent(SDLRenderer);
+	//SDL_RenderPresent(SDLRenderer);
 }
 

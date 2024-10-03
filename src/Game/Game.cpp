@@ -5,6 +5,7 @@
 #include "Logger/Logger.h"
 #include "ECS/ECS.h"
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Systems/MovementSystem.h"
 
 void Game::Initialize()
 {
@@ -111,6 +112,8 @@ void Game::Setup()
 	ECSManager GameManager;
 	auto E = GameManager.CreateEntity();
 	GameManager.AddComponent<TransformComponent>(E);
+	GameManager.AddSystem<MovementSystem>();
+	GameManager.AddEntityToSystems(E);
 }
 
 void Game::ProcessInput()

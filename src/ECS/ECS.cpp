@@ -15,11 +15,16 @@ void System::RemoveEntity(Entity InEntity)
 	Entities.erase(Entities.begin() + InEntity.GetID());
 }
 
+ECSManager::ECSManager()
+{
+
+}
+
 ECSManager::~ECSManager()
 {
 	for (int i = 0; i < ComponentPools.size(); i++)
 	{
-		delete ComponentPools[i]; //IPool*
+		delete ComponentPools[i]; // IPool*
 	}
 
 	for (const auto& pair : Systems)
@@ -30,20 +35,32 @@ ECSManager::~ECSManager()
 
 Entity ECSManager::CreateEntity()
 {
-	Entity E;
-	EntitiesToBeAdded.insert(E.GetID());
+	Entity e;
+	EntitiesToBeAdded.insert(e.GetID());
 
 	++NumEntities;
 
-	Logger::LogMessage("Entity created with id " + std::to_string(E.GetID()));
-	Logger::LogMessage("NumEntities is" + std::to_string(NumEntities));
-
-	return E;
+	return e;
 }
 
 void ECSManager::DestroyEntity(Entity InEntity)
 {
 	EntitiesToBeRemoved.insert(InEntity.GetID());
+}
+
+void ECSManager::AddEntityToSystems(const Entity InEntity)
+{
+	assert(InEntity.GetID() < EntityComponentSignatures.size());
+	
+	const Signature& entitySignature = EntityComponentSignatures[InEntity.GetID()];
+
+	for (const auto& [typeIndex, system] : Systems)
+	{
+		if ((system->GetComponentSignature() & entitySignature) == entitySignature)
+		{
+			system->AddEntity(InEntity);
+		}
+	}
 }
 
 void ECSManager::Update()

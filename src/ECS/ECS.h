@@ -12,9 +12,9 @@
  * Using a bitset of MaxComponents size allows us to flag the presence of the component
  * with ID matching the index of that bit in the signature.
  * 
- * Possible TODO: rather than having a maximum number of components restricted by
- * number of bits in a single data type, could refactor to use a data structure
- * to store them instead
+ * TODO: rather than having a maximum number of components restricted by the size of
+ * a single data type, could refactor to use data structures as signatures instead. 
+ * That way we don't have a restriction on the number of components we can write.
  */
 typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
 
@@ -141,7 +141,7 @@ private:
 class ECSManager
 {
 public:
-	ECSManager() = default;
+	ECSManager();
 	~ECSManager();
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -150,9 +150,16 @@ public:
 	Entity CreateEntity();
 	void DestroyEntity(const Entity InEntity);
 
+	unsigned int NumEntities = 0;
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Component Management
 
+	/**
+	 * Optional params after InEntity are forwarded to the constructor of TComponent.
+	 * Make sure they are present and correct if TComponent's constructor
+	 * does not have defaults!
+	 */
 	template <typename TComponent, typename ...TArgs>
 	void AddComponent(Entity InEntity, TArgs&& ...Args);
 
@@ -165,6 +172,11 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	// System Management
 
+	/**
+	 * Optional params are forwarded to the constructor of TSystem.
+	 * Make sure they are present and correct if TSystem's constructor 
+	 * does not have defaults!
+	 */
 	template <typename TSystem, typename ...TArgs>
 	void AddSystem(TArgs&& ...Args);
 
@@ -177,7 +189,7 @@ public:
 	template <typename TSystem>
 	TSystem& GetSystem() const;
 
-	unsigned int NumEntities = 0;
+	void AddEntityToSystems(const Entity InEntity);
 
 private:
 	void Update();
@@ -207,43 +219,43 @@ private:
 template <typename TComponent, typename ...TArgs>
 void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 {
-	const auto EntityID = InEntity.GetID();
-	const auto ComponentID = Component<TComponent>::GetID();
+	const auto entityID = InEntity.GetID();
+	const auto componentID = Component<TComponent>::GetID();
 
 	// Bounds check on the array of pools, allocate nullptrs as needed
-	if (ComponentID >= ComponentPools.size())
+	if (componentID >= ComponentPools.size())
 	{
-		ComponentPools.resize(ComponentID + 1, nullptr);
+		ComponentPools.resize(componentID + 1, nullptr);
 	}
 
 	// If we needed to add nullptrs, allocate a new Pool and store it
-	if (ComponentPools[ComponentID] == nullptr)
+	if (ComponentPools[componentID] == nullptr)
 	{
-		ComponentPools[ComponentID] = new Pool<TComponent>();
+		ComponentPools[componentID] = new Pool<TComponent>();
 	}
 
 	// Need to cast here because ComponentPool stores IPool* (todo: does static cast work?)
-	Pool<TComponent>* ComponentPool = static_cast<Pool<TComponent>*>(ComponentPools[ComponentID]);
+	Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>(ComponentPools[componentID]);
 
 	// Bounds check on this particular pool
-	if (EntityID >= ComponentPool->Size())
+	if (entityID >= componentPool->Size())
 	{
-		ComponentPool->Resize(EntityID + 1);
+		componentPool->Resize(entityID + 1);
 	}
 
 	// Make a new component to assign to the entity, forwarding constructor args if they are present
-	TComponent NewComponent(std::forward<TArgs>(Args)...);
+	TComponent newComponent(std::forward<TArgs>(Args)...);
 
 	// Assign it to the entity (in this component type's pool, at this entity ID's index)
-	ComponentPool->Insert(EntityID, NewComponent);
+	componentPool->Insert(entityID, newComponent);
 
-	if (EntityID >= EntityComponentSignatures.size())
+	if (entityID >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(EntityID + 1);
+		EntityComponentSignatures.resize(entityID + 1);
 	}
 
 	// Update the entity's signature to indicate that this component is assigned to this entity
-	EntityComponentSignatures[EntityID].set(ComponentID);
+	EntityComponentSignatures[entityID].set(componentID);
 }
 
 template <typename TComponent>
@@ -263,43 +275,41 @@ void ECSManager::RemoveComponent(Entity InEntity)
 template <typename TSystem, typename ...TArgs>
 void ECSManager::AddSystem(TArgs&& ...Args)
 {
-	// TODO: Systems can probably cache this value
-	// We sure are calculating it a lot
-	const auto SystemIdx = std::type_index(typeid(TSystem));
+	const auto systemIdx = std::type_index(typeid(TSystem));
 
-	if (Systems.count(SystemIdx) == 0)
+	if (Systems.count(systemIdx) == 0)
 	{
 		TSystem* newSystem = new TSystem(std::forward<TArgs>(Args)...);
-		Systems[SystemIdx] = newSystem;
+		Systems[systemIdx] = newSystem;
 	}
 }
 
 template <typename TSystem>
 void ECSManager::RemoveSystem()
 {
-	const auto SystemIdx = std::type_index(typeid(TSystem));
+	const auto systemIdx = std::type_index(typeid(TSystem));
 	
-	if (Systems.count(SystemIdx))
+	if (Systems.count(systemIdx))
 	{
-		Systems.erase(SystemIdx);
+		Systems.erase(systemIdx);
 	}
 }
 
 template <typename TSystem>
 const bool ECSManager::HasSystem() const
 {
-	const auto SystemIdx = std::type_index(typeid(TSystem));
-	return Systems.count(SystemIdx);
+	const auto systemIdx = std::type_index(typeid(TSystem));
+	return Systems.count(systemIdx);
 }
 
 template <typename TSystem>
 TSystem& ECSManager::GetSystem() const
 {
-	const auto SystemIdx = std::type_index(typeid(TSystem));
+	const auto systemIdx = std::type_index(typeid(TSystem));
 
-	if (Systems.count(SystemIdx))
+	if (Systems.count(systemIdx) && Systems[systemIdx] != nullptr)
 	{
-		return Systems[SystemIdx];
+		return *static_cast<TSystem*>(Systems[systemIdx]);
 	}
 }
 

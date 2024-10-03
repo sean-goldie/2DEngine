@@ -17,9 +17,14 @@ void System::RemoveEntity(Entity InEntity)
 
 ECSManager::~ECSManager()
 {
-	for (unsigned i = 0; i < ComponentPools.size(); i++)
+	for (int i = 0; i < ComponentPools.size(); i++)
 	{
-		delete ComponentPools[i];
+		delete ComponentPools[i]; //IPool*
+	}
+
+	for (const auto& pair : Systems)
+	{
+		delete pair.second; // System*
 	}
 }
 

@@ -59,8 +59,12 @@ protected:
 
 /**
  * Component with a specific ID
+ * NumComponents must live in IComponent because Component is templated.
+ * This is why we have to have this weird GetID declaration of the ComponentID
+ * for each templated TComponent. Putting the ID assignment in the constructor
+ * throws unresolved external symbol.
  */
- template <typename T>
+ template <typename TComponent>
 class Component : IComponent
 {
 public:
@@ -88,7 +92,7 @@ public:
 	virtual void Update() = 0;
 
 protected:
-	template <typename T>
+	template <typename TComponent>
 	void RequireComponent();
 
 private:
@@ -106,7 +110,7 @@ public:
 };
 
 /**
- * 
+ * Pool of some object. Can be Entity, Component, etc.
  */
 template <typename T>
 class Pool : public IPool
@@ -140,12 +144,38 @@ public:
 	ECSManager() = default;
 	~ECSManager();
 
-	/** Entity stuff */
+	////////////////////////////////////////////////////////////////////////////////
+	// Entity Management
+
 	Entity CreateEntity();
 	void DestroyEntity(const Entity InEntity);
 
-	template <typename T, typename ...TArgs>
+	////////////////////////////////////////////////////////////////////////////////
+	// Component Management
+
+	template <typename TComponent, typename ...TArgs>
 	void AddComponent(Entity InEntity, TArgs&& ...Args);
+
+	template <typename TComponent>
+	const bool HasComponent(const Entity InEntity) const;
+	
+	template <typename TComponent>
+	void RemoveComponent(Entity InEntity);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// System Management
+
+	template <typename TSystem, typename ...TArgs>
+	void AddSystem(TArgs&& ...Args);
+
+	template <typename TSystem>
+	void RemoveSystem();
+
+	template <typename TSystem>
+	const bool HasSystem() const;
+
+	template <typename TSystem>
+	TSystem& GetSystem() const;
 
 	unsigned int NumEntities = 0;
 
@@ -167,47 +197,114 @@ private:
 	 */
 	std::unordered_map<std::type_index, System*> Systems;
 
-	/** Entities flagged to be added or removed in the next Update() call */
+	/** 
+	 * Entities flagged to be added or removed in the next Update() call 
+	 */
 	std::set<unsigned int> EntitiesToBeAdded;
 	std::set<unsigned int> EntitiesToBeRemoved;
 };
 
-template <typename T, typename ...TArgs>
+template <typename TComponent, typename ...TArgs>
 void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 {
-	const auto ComponentID = Component<T>::GetID();
 	const auto EntityID = InEntity.GetID();
+	const auto ComponentID = Component<TComponent>::GetID();
 
+	// Bounds check on the array of pools, allocate nullptrs as needed
 	if (ComponentID >= ComponentPools.size())
 	{
 		ComponentPools.resize(ComponentID + 1, nullptr);
 	}
 
+	// If we needed to add nullptrs, allocate a new Pool and store it
 	if (ComponentPools[ComponentID] == nullptr)
 	{
-		ComponentPools[ComponentID] = new Pool<T>();
+		ComponentPools[ComponentID] = new Pool<TComponent>();
 	}
 
-	Pool<T>* ComponentPool = static_cast<Pool<T>*>(ComponentPools[ComponentID]);
+	// Need to cast here because ComponentPool stores IPool* (todo: does static cast work?)
+	Pool<TComponent>* ComponentPool = static_cast<Pool<TComponent>*>(ComponentPools[ComponentID]);
 
-	if (EntityID >= ComponentPool->Size())
-	{
-		ComponentPool->Resize(NumEntities);
-	}
-
-	T NewComponent(std::forward<TArgs>(Args)...);
-
+	// Bounds check on this particular pool
 	if (EntityID >= ComponentPool->Size())
 	{
 		ComponentPool->Resize(EntityID + 1);
 	}
+
+	// Make a new component to assign to the entity, forwarding constructor args if they are present
+	TComponent NewComponent(std::forward<TArgs>(Args)...);
+
+	// Assign it to the entity (in this component type's pool, at this entity ID's index)
 	ComponentPool->Insert(EntityID, NewComponent);
 
+	if (EntityID >= EntityComponentSignatures.size())
+	{
+		EntityComponentSignatures.resize(EntityID + 1);
+	}
+
+	// Update the entity's signature to indicate that this component is assigned to this entity
 	EntityComponentSignatures[EntityID].set(ComponentID);
 }
 
-template <typename T>
+template <typename TComponent>
+const bool ECSManager::HasComponent(const Entity InEntity) const
+{
+	assert(InEntity.GetID() < EntityComponentSignatures.size());
+	return EntityComponentSignatures[InEntity.GetID()].test(Component<TComponent>::GetID());
+}
+
+template <typename TComponent>
+void ECSManager::RemoveComponent(Entity InEntity)
+{
+	assert(InEntity.GetID() < EntityComponentSignatures.size());
+	EntityComponentSignatures[InEntity.GetID()].set(Component<TComponent>::GetID(), false);
+}
+
+template <typename TSystem, typename ...TArgs>
+void ECSManager::AddSystem(TArgs&& ...Args)
+{
+	// TODO: Systems can probably cache this value
+	// We sure are calculating it a lot
+	const auto SystemIdx = std::type_index(typeid(TSystem));
+
+	if (Systems.count(SystemIdx) == 0)
+	{
+		TSystem* newSystem = new TSystem(std::forward<TArgs>(Args)...);
+		Systems[SystemIdx] = newSystem;
+	}
+}
+
+template <typename TSystem>
+void ECSManager::RemoveSystem()
+{
+	const auto SystemIdx = std::type_index(typeid(TSystem));
+	
+	if (Systems.count(SystemIdx))
+	{
+		Systems.erase(SystemIdx);
+	}
+}
+
+template <typename TSystem>
+const bool ECSManager::HasSystem() const
+{
+	const auto SystemIdx = std::type_index(typeid(TSystem));
+	return Systems.count(SystemIdx);
+}
+
+template <typename TSystem>
+TSystem& ECSManager::GetSystem() const
+{
+	const auto SystemIdx = std::type_index(typeid(TSystem));
+
+	if (Systems.count(SystemIdx))
+	{
+		return Systems[SystemIdx];
+	}
+}
+
+template <typename TComponent>
 void System::RequireComponent()
 {
-	ComponentSignature.set(Component<T>::GetID());
+	ComponentSignature.set(Component<TComponent>::GetID());
 }

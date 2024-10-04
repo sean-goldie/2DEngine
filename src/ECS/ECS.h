@@ -1,6 +1,10 @@
 #pragma once
 
-#include <Util/CoreStatics.h>
+#include "Logger/Logger.h"
+#include "Util/CoreStatics.h"
+
+// Unfortunately all these things have to be included here as we are using typedefs and
+// smart pointers and things, and this file contains template implementations
 #include <bitset>
 #include <vector>
 #include <assert.h>
@@ -20,7 +24,7 @@
 typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
 
 /**
- * Entity class. Just contains an ID.
+ * Entity class. Basically just an ID.
  * We will pass systems COPIES of this class to store rather than pointers, since
  * the class itself is just a wrapper around plain old data.
  * Holds the current number of entities as well as the max number (size of uint32)
@@ -29,21 +33,38 @@ typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
 class Entity
 {
 public:
-	Entity() : EntityID(NumEntities++) { assert(NumEntities < NullID); }
+	Entity(class ECSManager* Owner) : EntityID(NumEntities++), Owner(std::make_shared<ECSManager>(*Owner))
+	{ 
+		assert(NumEntities < CoreStatics::MaxNumEntities); 
+	}
+
 	const unsigned int GetID() const { return EntityID; }
 
 	Entity& operator =(const Entity& Other) = default;
 	bool operator==(const Entity& Other) const { return EntityID == Other.GetID(); }
 	bool operator<(const Entity& Other) const { return EntityID < Other.GetID(); }
 	bool operator>(const Entity& Other) const { return EntityID > Other.GetID(); }
-	
-	constexpr static unsigned int NullID = -1; // INT_MAX
+
+	// Adding these wrappers to simply forward to the Owner for readability in game code
+	template <typename TComponent, typename ...TArgs>
+	void AddComponent(TArgs&& ...Args);
+
+	template <typename TComponent>
+	void RemoveComponent();
+
+	template <typename TComponent>
+	const bool HasComponent() const;
+
+	template <typename TComponent>
+	TComponent& GetComponent() const;
 
 protected:
 	static unsigned int NumEntities; // = 0;
 
 private:
 	unsigned int EntityID;
+	std::shared_ptr<ECSManager> Owner;
+	//ECSManager* Owner; // Does this need to be a C ptr??
 };
 
 /**
@@ -154,7 +175,7 @@ public:
 	ECSManager();
 	~ECSManager();
 
-	void Update();
+	void Update(const double DeltaTime);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Entity Management
@@ -180,6 +201,9 @@ public:
 	
 	template <typename TComponent>
 	void RemoveComponent(Entity InEntity);
+
+	template <typename TComponent>
+	TComponent& GetComponent(const Entity InEntity);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// System Management
@@ -249,9 +273,9 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 	);
 
 	// Bounds check on this particular pool
-	if (entityID >= componentPool->Size())
+	if (entityID >= (unsigned)componentPool->Size()) // blah warning blah
 	{
-		componentPool->Resize(NumEntities);
+		componentPool->Resize(entityID + 1);
 	}
 
 	// Make a new component to assign to the entity, forwarding constructor args if they are present
@@ -262,11 +286,15 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 
 	if (entityID >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(NumEntities);
+		EntityComponentSignatures.resize(entityID + 1);
 	}
 
 	// Update the entity's signature to indicate that this component is assigned to this entity
 	EntityComponentSignatures[entityID].set(componentID);
+
+	Logger::LogMessage(
+		"Component " + std::to_string(componentID) + 
+		" added to entity " + std::to_string(entityID));
 }
 
 template <typename TComponent>
@@ -281,6 +309,15 @@ void ECSManager::RemoveComponent(Entity InEntity)
 {
 	assert(InEntity.GetID() < EntityComponentSignatures.size());
 	EntityComponentSignatures[InEntity.GetID()].set(Component<TComponent>::GetID(), false);
+}
+
+template <typename TComponent>
+TComponent& ECSManager::GetComponent(const Entity InEntity)
+{
+	assert(HasComponent<TComponent>(InEntity));
+	const auto entityId = InEntity.GetID();
+	const auto* componentPool = ComponentPools[Component<TComponent>::GetID()];
+	return *componentPool[entityId];
 }
 
 template <typename TSystem, typename ...TArgs>
@@ -328,4 +365,29 @@ template <typename TComponent>
 void System::RequireComponent()
 {
 	ComponentSignature.set(Component<TComponent>::GetID());
+}
+
+
+template <typename TComponent, typename ...TArgs>
+void Entity::AddComponent(TArgs&& ...Args)
+{
+	Owner->AddComponent<TComponent>(*this, std::forward<TArgs>(Args)...);
+}
+
+template <typename TComponent>
+void Entity::RemoveComponent()
+{
+	Owner->RemoveComponent<TComponent>(*this);
+}
+
+template <typename TComponent>
+const bool Entity::HasComponent() const
+{
+	return Owner->HasComponent<TComponent>(*this);
+}
+
+template <typename TComponent>
+TComponent& Entity::GetComponent() const
+{
+	return Owner->GetComponent<TComponent>(*this);
 }

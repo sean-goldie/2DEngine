@@ -1,5 +1,4 @@
 #include "ECS.h"
-#include "Logger/Logger.h"
 
 unsigned int Entity::NumEntities = 0;
 unsigned int IComponent::NumComponents = 0;
@@ -26,16 +25,16 @@ ECSManager::~ECSManager()
 
 Entity ECSManager::CreateEntity()
 {
-	Entity e;
-	EntitiesToBeAdded.insert(e);
+	Entity entity(this);
+	EntitiesToBeAdded.insert(entity);
 	++NumEntities;
 
-	if (e.GetID() >= EntityComponentSignatures.size())
+	if (entity.GetID() >= EntityComponentSignatures.size())
 	{
 		EntityComponentSignatures.resize(NumEntities);
 	}
 
-	return e;
+	return entity;
 }
 
 void ECSManager::DestroyEntity(Entity InEntity)
@@ -58,9 +57,9 @@ void ECSManager::AddEntityToSystems(const Entity InEntity)
 	}
 }
 
-void ECSManager::Update()
+void ECSManager::Update(const double DeltaTime)
 {
-	for (Entity next : EntitiesToBeAdded)
+	for (const Entity& next : EntitiesToBeAdded)
 	{
 		AddEntityToSystems(next);
 	}

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <memory>
 #include "ECS/ECS.h" // Must be included here to allocate unique_ptr<ECSManager>
 
@@ -51,10 +52,11 @@ private:
 
 	bool IsRunning = false;
 
+	// Raw pointers returned from SDL C API
 	SDL_Window* SDLWindow = nullptr;
 	SDL_Renderer* SDLRenderer = nullptr;
 
-	std::unique_ptr<ECSManager> GameManager = nullptr;
+	std::shared_ptr<ECSManager> GameManager = nullptr;
 
 	unsigned int MillisecsPreviousFrame = 0;
 };

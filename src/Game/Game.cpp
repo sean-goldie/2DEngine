@@ -3,6 +3,7 @@
 #include "Util/CoreStatics.h"
 #include "Logger/Logger.h"
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/RigidBodyComponent.h"
 #include "ECS/Systems/MovementSystem.h"
 
 Game::Game()
@@ -23,7 +24,8 @@ void Game::Setup()
 
 	// test test test
 	auto e = GameManager->CreateEntity();
-	GameManager->AddComponent<TransformComponent>(e);
+	e.AddComponent<TransformComponent>();
+	e.AddComponent<RigidBodyComponent>();
 
 	Logger::LogMessage("Created entity with ID " + std::to_string(e.GetID()));
 
@@ -54,7 +56,7 @@ void Game::ProcessInput()
 
 void Game::Update(const double DeltaTime)
 {
-	GameManager->Update();
+	//GameManager->Update(DeltaTime);
 }
 
 void Game::Render()

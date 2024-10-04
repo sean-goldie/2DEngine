@@ -394,6 +394,7 @@
     <ClInclude Include="libs\sol\config.hpp" />
     <ClInclude Include="libs\sol\forward.hpp" />
     <ClInclude Include="libs\sol\sol.hpp" />
+    <ClInclude Include="src\ECS\Components\RigidBodyComponent.h" />
     <ClInclude Include="src\ECS\Components\TransformComponent.h" />
     <ClInclude Include="src\ECS\ECS.h" />
     <ClInclude Include="src\ECS\Systems\MovementSystem.h" />

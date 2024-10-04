@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <set>
+#include <memory>
 
 /**
  * Using a bitset of MaxComponents size allows us to flag the presence of the component
@@ -32,9 +33,9 @@ public:
 	const unsigned int GetID() const { return EntityID; }
 
 	Entity& operator =(const Entity& Other) = default;
-	bool operator==(const Entity& Other) { return EntityID == Other.GetID(); }
-	bool operator<(const Entity& Other) { return EntityID < Other.GetID(); }
-	bool operator>(const Entity& Other) { return EntityID > Other.GetID(); }
+	bool operator==(const Entity& Other) const { return EntityID == Other.GetID(); }
+	bool operator<(const Entity& Other) const { return EntityID < Other.GetID(); }
+	bool operator>(const Entity& Other) const { return EntityID > Other.GetID(); }
 	
 	constexpr static unsigned int NullID = -1; // INT_MAX
 
@@ -60,9 +61,18 @@ protected:
 /**
  * Component with a specific ID
  * NumComponents must live in IComponent because Component is templated.
+ * 
  * This is why we have to have this weird GetID declaration of the ComponentID
  * for each templated TComponent. Putting the ID assignment in the constructor
  * throws unresolved external symbol.
+ * 
+ * We need templated Components in order that each type can naively have an ID
+ * (whereas we don't need to do this for entities since there are not multiple
+ * types of Entities, or for Systems because we are using type_index as keys there)
+ * 
+ * Possibly this could be refactored to work similarly to Systems in the future,
+ * but this implementation is taken from the course and so it's what I'm going with 
+ * for now.
  */
  template <typename TComponent>
 class Component : IComponent
@@ -144,6 +154,8 @@ public:
 	ECSManager();
 	~ECSManager();
 
+	void Update();
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Entity Management
 
@@ -189,15 +201,13 @@ public:
 	template <typename TSystem>
 	TSystem& GetSystem() const;
 
-	void AddEntityToSystems(const Entity InEntity);
-
 private:
-	void Update();
+	void AddEntityToSystems(const Entity InEntity);
 
 	/**
 	 * Index indicates ComponentID, value is that component's pool (of entities with that component)
 	 */
-	std::vector<IPool*> ComponentPools;
+	std::vector<std::shared_ptr<IPool>> ComponentPools;
 
 	/**
 	 * Index indicates EntityID, value is that entity's signature
@@ -207,13 +217,13 @@ private:
 	/**
 	 * System map doesn't need to be ordered, since systems have no ID.
 	 */
-	std::unordered_map<std::type_index, System*> Systems;
+	 std::unordered_map<std::type_index, std::shared_ptr<System>> Systems;
 
 	/** 
 	 * Entities flagged to be added or removed in the next Update() call 
 	 */
-	std::set<unsigned int> EntitiesToBeAdded;
-	std::set<unsigned int> EntitiesToBeRemoved;
+	std::set<Entity> EntitiesToBeAdded;
+	std::set<Entity> EntitiesToBeRemoved;
 };
 
 template <typename TComponent, typename ...TArgs>
@@ -231,16 +241,17 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 	// If we needed to add nullptrs, allocate a new Pool and store it
 	if (ComponentPools[componentID] == nullptr)
 	{
-		ComponentPools[componentID] = new Pool<TComponent>();
+		ComponentPools[componentID] = std::make_shared<Pool<TComponent>>();
 	}
 
-	// Need to cast here because ComponentPool stores IPool* (todo: does static cast work?)
-	Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>(ComponentPools[componentID]);
+	std::shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(
+		ComponentPools[componentID]
+	);
 
 	// Bounds check on this particular pool
 	if (entityID >= componentPool->Size())
 	{
-		componentPool->Resize(entityID + 1);
+		componentPool->Resize(NumEntities);
 	}
 
 	// Make a new component to assign to the entity, forwarding constructor args if they are present
@@ -251,7 +262,7 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 
 	if (entityID >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(entityID + 1);
+		EntityComponentSignatures.resize(NumEntities);
 	}
 
 	// Update the entity's signature to indicate that this component is assigned to this entity
@@ -279,7 +290,7 @@ void ECSManager::AddSystem(TArgs&& ...Args)
 
 	if (Systems.count(systemIdx) == 0)
 	{
-		TSystem* newSystem = new TSystem(std::forward<TArgs>(Args)...);
+		std::shared_ptr<TSystem> newSystem = std::make_unique<TSystem>(std::forward<TArgs>(Args)...);
 		Systems[systemIdx] = newSystem;
 	}
 }
@@ -309,7 +320,7 @@ TSystem& ECSManager::GetSystem() const
 
 	if (Systems.count(systemIdx) && Systems[systemIdx] != nullptr)
 	{
-		return *static_cast<TSystem*>(Systems[systemIdx]);
+		return *static_ptr_cast<TSystem>(Systems[systemIdx]);
 	}
 }
 

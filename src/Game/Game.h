@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+#include "ECS/ECS.h" // Must be included here to allocate unique_ptr<ECSManager>
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -30,6 +32,8 @@ struct SDLParameters
 class Game
 {
 public:
+	Game();
+
 	/** Go!! */
 	void Play();
 
@@ -50,11 +54,7 @@ private:
 	SDL_Window* SDLWindow = nullptr;
 	SDL_Renderer* SDLRenderer = nullptr;
 
-	//std::string AssetPath = "./assets/";
-
-	// TODO Test BS
-	//std::string TestAssetPath = AssetPath + "images/tank-tiger-right.png";
-	//SDL_Texture* TestTexture = nullptr;
+	std::unique_ptr<ECSManager> GameManager = nullptr;
 
 	unsigned int MillisecsPreviousFrame = 0;
 };

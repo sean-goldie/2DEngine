@@ -1,7 +1,6 @@
 #include "ECS.h"
 #include "Logger/Logger.h"
 
-// TODO: there is a bug here where NumEntities is being initialized with 1 somehow
 unsigned int Entity::NumEntities = 0;
 unsigned int IComponent::NumComponents = 0;
 
@@ -22,30 +21,26 @@ ECSManager::ECSManager()
 
 ECSManager::~ECSManager()
 {
-	for (int i = 0; i < ComponentPools.size(); i++)
-	{
-		delete ComponentPools[i]; // IPool*
-	}
 
-	for (const auto& pair : Systems)
-	{
-		delete pair.second; // System*
-	}
 }
 
 Entity ECSManager::CreateEntity()
 {
 	Entity e;
-	EntitiesToBeAdded.insert(e.GetID());
-
+	EntitiesToBeAdded.insert(e);
 	++NumEntities;
+
+	if (e.GetID() >= EntityComponentSignatures.size())
+	{
+		EntityComponentSignatures.resize(NumEntities);
+	}
 
 	return e;
 }
 
 void ECSManager::DestroyEntity(Entity InEntity)
 {
-	EntitiesToBeRemoved.insert(InEntity.GetID());
+	EntitiesToBeRemoved.insert(InEntity);
 }
 
 void ECSManager::AddEntityToSystems(const Entity InEntity)
@@ -65,12 +60,14 @@ void ECSManager::AddEntityToSystems(const Entity InEntity)
 
 void ECSManager::Update()
 {
-	for (const unsigned int next : EntitiesToBeAdded)
+	for (Entity next : EntitiesToBeAdded)
+	{
+		AddEntityToSystems(next);
+	}
+	EntitiesToBeAdded.clear();
+
+	for (Entity next : EntitiesToBeRemoved)
 	{
 		
-	}
-	for (const unsigned int next : EntitiesToBeRemoved)
-	{
-
 	}
 }

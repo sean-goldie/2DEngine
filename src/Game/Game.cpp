@@ -1,11 +1,66 @@
 #include <SDL.h>
-#include <SDL_image.h>
 #include "Game.h"
 #include "Util/CoreStatics.h"
 #include "Logger/Logger.h"
-#include "ECS/ECS.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Systems/MovementSystem.h"
+
+Game::Game()
+{
+	GameManager = std::make_unique<ECSManager>();
+}
+
+void Game::Play()
+{
+	Initialize();
+	Run();
+	Destroy();
+}
+
+void Game::Setup()
+{
+	GameManager->AddSystem<MovementSystem>();
+
+	// test test test
+	auto e = GameManager->CreateEntity();
+	GameManager->AddComponent<TransformComponent>(e);
+
+	Logger::LogMessage("Created entity with ID " + std::to_string(e.GetID()));
+
+}
+
+void Game::ProcessInput()
+{
+	SDL_Event sdlEvent;
+
+	while (SDL_PollEvent(&sdlEvent))
+	{
+		switch (sdlEvent.type)
+		{
+			// TODO: Give games a way to trigger this event.
+		case SDL_QUIT:
+			IsRunning = false;
+			break;
+			// Debug use escape key to quit everything.
+		case SDL_KEYDOWN:
+			if (sdlEvent.key.keysym.sym == SDLK_ESCAPE && CoreStatics::IsDebugBuild)
+			{
+				IsRunning = false;
+			}
+			break;
+		}
+	}
+}
+
+void Game::Update(const double DeltaTime)
+{
+	GameManager->Update();
+}
+
+void Game::Render()
+{
+
+}
 
 void Game::Initialize()
 {
@@ -94,79 +149,4 @@ void Game::Destroy()
 	SDL_DestroyRenderer(SDLRenderer);
 	SDL_DestroyWindow(SDLWindow);
 	SDL_Quit();
-
-	SDLWindow = nullptr;
-	SDLRenderer = nullptr;
 }
-
-void Game::Play()
-{
-	Initialize();
-	Run();
-	Destroy();
-}
-
-void Game::Setup()
-{
-	// test test test
-	ECSManager GameManager;
-	auto E = GameManager.CreateEntity();
-	GameManager.AddComponent<TransformComponent>(E);
-	GameManager.AddSystem<MovementSystem>();
-	GameManager.AddEntityToSystems(E);
-}
-
-void Game::ProcessInput()
-{
-	SDL_Event sdlEvent;
-	
-	while (SDL_PollEvent(&sdlEvent))
-	{
-		switch (sdlEvent.type)
-		{
-			case SDL_QUIT:
-				IsRunning = false;
-				break;
-			// TODO: Temp/debug use escape key to quit everything. Need to implement SDL_QUIT instead
-			case SDL_KEYDOWN:
-				if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
-				{
-					IsRunning = false;
-				}
-				break;
-		}
-	}
-}
-
-void Game::Update(const double DeltaTime)
-{
-
-}
-
-void Game::Render()
-{
-	//SDL_SetRenderDrawColor(SDLRenderer, 20, 20, 20, 255);
-	//SDL_RenderClear(SDLRenderer);
-
-	//SDL_Rect dstRect { static_cast<int>(playerPosition.x), static_cast<int>(playerPosition.y), 32, 32 };
-
-	//if (TestTexture == nullptr)
-	//{
-	//	if (SDL_Surface* surface = IMG_Load(TestAssetPath.c_str()))
-	//	{
-	//		if (TestTexture = SDL_CreateTextureFromSurface(SDLRenderer, surface))
-	//		{
-	//			SDL_FreeSurface(surface);
-	//		}
-	//	}
-	//	else
-	//	{
-	//		Logger::LogError("Error rendering asset at " + TestAssetPath);
-	//	}
-	//}
-
-	//SDL_RenderCopy(SDLRenderer, TestTexture, nullptr, &dstRect);
-
-	//SDL_RenderPresent(SDLRenderer);
-}
-

@@ -394,6 +394,7 @@
     <ClInclude Include="libs\sol\config.hpp" />
     <ClInclude Include="libs\sol\forward.hpp" />
     <ClInclude Include="libs\sol\sol.hpp" />
+    <ClInclude Include="src\Asset\AssetManager.h" />
     <ClInclude Include="src\ECS\Components\AllComponents.h" />
     <ClInclude Include="src\ECS\Components\RigidBodyComponent.h" />
     <ClInclude Include="src\ECS\Components\SpriteComponent.h" />

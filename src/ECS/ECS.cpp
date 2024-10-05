@@ -20,7 +20,15 @@ ECSManager::ECSManager()
 
 ECSManager::~ECSManager()
 {
+	for (IPool* pool : ComponentPools)
+	{
+		delete pool;
+	}
 
+	for (auto& pair : Systems)
+	{
+		delete pair.second;
+	}
 }
 
 Entity ECSManager::CreateEntity()

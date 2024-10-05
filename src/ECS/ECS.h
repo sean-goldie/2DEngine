@@ -25,7 +25,7 @@ class Entity
 public:
 	Entity(class ECSManager* Owner) : 
 		EntityID(NumEntities++), 
-		Owner(std::make_shared<ECSManager>(*Owner))
+		Owner(Owner)
 	{ 
 		assert(NumEntities < CoreStatics::MaxNumEntities); 
 	}
@@ -55,7 +55,7 @@ protected:
 
 private:
 	unsigned int EntityID;
-	std::shared_ptr<ECSManager> Owner;
+	ECSManager* Owner;
 };
 
 /**
@@ -214,7 +214,7 @@ public:
 	const bool HasSystem() const;
 
 	template <typename TSystem>
-	std::shared_ptr<TSystem> GetSystem() const;
+	TSystem* GetSystem() const;
 
 private:
 	void AddEntityToSystems(const Entity InEntity);
@@ -224,7 +224,7 @@ private:
 	/**
 	 * Index indicates ComponentID, value is that component's pool (of entities with that component)
 	 */
-	std::vector<std::shared_ptr<IPool>> ComponentPools;
+	std::vector<IPool*> ComponentPools;
 
 	/**
 	 * Index indicates EntityID, value is that entity's signature
@@ -234,7 +234,7 @@ private:
 	/**
 	 * System map doesn't need to be ordered, since systems have no ID.
 	 */
-	 std::unordered_map<std::type_index, std::shared_ptr<System>> Systems;
+	 std::unordered_map<std::type_index, System*> Systems;
 
 	/** 
 	 * Entities flagged to be added or removed in the next Update() call 
@@ -265,12 +265,10 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 	// If we needed to add nullptrs, allocate a new Pool and store it
 	if (ComponentPools[componentID] == nullptr)
 	{
-		ComponentPools[componentID] = std::make_shared<Pool<TComponent>>();
+		ComponentPools[componentID] = new Pool<TComponent>();
 	}
 
-	std::shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(
-		ComponentPools[componentID]
-	);
+	Pool<TComponent>* componentPool = (Pool<TComponent>*)(ComponentPools[componentID]);
 
 	// Bounds check on this particular pool
 	if (entityID >= (unsigned)componentPool->Size()) // blah warning blah
@@ -328,7 +326,7 @@ TComponent& ECSManager::GetComponent(const Entity InEntity)
 	const auto entityId = InEntity.GetID();
 	const auto componentId = Component<TComponent>::GetID();
 
-	std::shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(ComponentPools[componentId]);
+	Pool<TComponent>* componentPool = (Pool<TComponent>*)(ComponentPools[componentId]);
 
 	return componentPool->Get(entityId);
 }
@@ -340,7 +338,7 @@ void ECSManager::AddSystem(TArgs&& ...Args)
 
 	if (Systems.count(systemIdx) == 0)
 	{
-		Systems[systemIdx] = std::make_shared<TSystem>(std::forward<TArgs>(Args)...);;
+		Systems[systemIdx] = new TSystem(std::forward<TArgs>(Args)...);
 	}
 }
 
@@ -363,7 +361,7 @@ const bool ECSManager::HasSystem() const
 }
 
 template <typename TSystem>
-std::shared_ptr<TSystem> ECSManager::GetSystem() const
+TSystem* ECSManager::GetSystem() const
 {
 	const auto systemIdx = std::type_index(typeid(TSystem));
 	const auto systemItr = Systems.find(systemIdx);
@@ -374,7 +372,7 @@ std::shared_ptr<TSystem> ECSManager::GetSystem() const
 
 		if (pair.second != nullptr)
 		{
-			return static_pointer_cast<TSystem>(pair.second);
+			return (TSystem*)(pair.second);
 		}
 	}
 	

@@ -61,7 +61,7 @@ private:
 	void Destroy();
 
 protected:
-	std::shared_ptr<ECSManager> GameManager = nullptr;
+	ECSManager* GameManager = nullptr;
 	SDLParameters DisplayParameters;
 
 private:

@@ -22,7 +22,6 @@ void RenderSystem::Update(const float DeltaTime)
 
 		if (SDL_Renderer* Renderer = Game::GetRenderer())
 		{
-			
 			SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
 			SDL_RenderFillRect(Renderer, &object);
 			SDL_RenderPresent(Renderer);

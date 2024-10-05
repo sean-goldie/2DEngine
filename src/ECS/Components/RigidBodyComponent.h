@@ -6,7 +6,7 @@
 class RigidBodyComponent : public Component<RigidBodyComponent>
 {
 public:
-	RigidBodyComponent(glm::vec2 Velocity = glm::vec2(0.0f, 0.0f)) : Velocity(Velocity) {}
+	RigidBodyComponent(Vector2 Velocity = Vector2(0.0f, 0.0f)) : Velocity(Velocity) {}
 
-	glm::vec2 Velocity;
+	Vector2 Velocity;
 };

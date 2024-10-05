@@ -7,7 +7,7 @@ SDL_Renderer* Game::SDLRenderer = nullptr;
 
 Game::Game()
 {
-	GameManager = std::make_unique<ECSManager>();
+	GameManager = new ECSManager;
 }
 
 void Game::Play()
@@ -149,4 +149,6 @@ void Game::Destroy()
 	SDL_DestroyRenderer(SDLRenderer);
 	SDL_DestroyWindow(SDLWindow);
 	SDL_Quit();
+
+	delete GameManager;
 }

@@ -2,26 +2,16 @@
 
 #include "Logger/Logger.h"
 #include "Util/CoreStatics.h"
+#include "Util/Typedef.h"
 
 // Unfortunately all these things have to be included here as we are using typedefs and
 // smart pointers and things, and this file contains template implementations
-#include <bitset>
 #include <vector>
 #include <assert.h>
 #include <unordered_map>
 #include <typeindex>
 #include <set>
 #include <memory>
-
-/**
- * Using a bitset of MaxComponents size allows us to flag the presence of the component
- * with ID matching the index of that bit in the signature.
- * 
- * TODO: rather than having a maximum number of components restricted by the size of
- * a single data type, could refactor to use data structures as signatures instead. 
- * That way we don't have a restriction on the number of components we can write.
- */
-typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
 
 /**
  * Entity class. Basically just an ID.
@@ -47,7 +37,7 @@ public:
 	bool operator<(const Entity& Other) const { return EntityID < Other.GetID(); }
 	bool operator>(const Entity& Other) const { return EntityID > Other.GetID(); }
 
-	// Adding these wrappers to simply forward to the Owner for readability in game code
+	/** Wrappers for ease of use. Optional args forwarded to the component's constructor */
 	template <typename TComponent, typename ...TArgs>
 	void AddComponent(TArgs&& ...Args);
 

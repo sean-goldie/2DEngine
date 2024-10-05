@@ -406,6 +406,7 @@
     <ClInclude Include="src\Game\TestGame.h" />
     <ClInclude Include="src\Util\CoreStatics.h" />
     <ClInclude Include="src\Logger\Logger.h" />
+    <ClInclude Include="src\Util\Typedef.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libavif-16.dll" />

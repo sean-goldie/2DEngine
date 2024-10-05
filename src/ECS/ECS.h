@@ -33,7 +33,9 @@ typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
 class Entity
 {
 public:
-	Entity(class ECSManager* Owner) : EntityID(NumEntities++), Owner(std::make_shared<ECSManager>(*Owner))
+	Entity(class ECSManager* Owner) : 
+		EntityID(NumEntities++), 
+		Owner(std::make_shared<ECSManager>(*Owner))
 	{ 
 		assert(NumEntities < CoreStatics::MaxNumEntities); 
 	}
@@ -64,7 +66,6 @@ protected:
 private:
 	unsigned int EntityID;
 	std::shared_ptr<ECSManager> Owner;
-	//ECSManager* Owner; // Does this need to be a C ptr??
 };
 
 /**
@@ -120,7 +121,7 @@ public:
 	const std::vector<Entity>& GetEntities() const { return Entities; }
 	const Signature& GetComponentSignature() const { return ComponentSignature; }
 
-	virtual void Update() = 0;
+	virtual void Update(const float DeltaTime) = 0;
 
 protected:
 	template <typename TComponent>
@@ -175,7 +176,7 @@ public:
 	ECSManager();
 	~ECSManager();
 
-	void Update(const double DeltaTime);
+	void Update(const float DeltaTime);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Entity Management
@@ -227,6 +228,8 @@ public:
 
 private:
 	void AddEntityToSystems(const Entity InEntity);
+	void RemoveEntityFromSystems(const Entity InEntity);
+	void UpdateEntityInSystems(const Entity InEntity, const Signature& Old, const Signature& New);
 
 	/**
 	 * Index indicates ComponentID, value is that component's pool (of entities with that component)
@@ -253,6 +256,13 @@ private:
 template <typename TComponent, typename ...TArgs>
 void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 {
+	// Possible TODO: support for entities adding and removing components
+	// in scopes outside of the ones in which they are created
+	// In other words... right now we only add them to systems if they are new
+	// and in the EntitiesToBeAdded structure. If their components change,
+	// we should probably remove them from all current systems and
+	// add them back into that structure to be evaluated again.
+
 	const auto entityID = InEntity.GetID();
 	const auto componentID = Component<TComponent>::GetID();
 
@@ -289,8 +299,13 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 		EntityComponentSignatures.resize(entityID + 1);
 	}
 
+	// Capture the old signature
+	const Signature oldEntitySignature = EntityComponentSignatures[entityID];
+
 	// Update the entity's signature to indicate that this component is assigned to this entity
-	EntityComponentSignatures[entityID].set(componentID);
+	const Signature newEntitySignature = EntityComponentSignatures[entityID].set(componentID);
+
+	UpdateEntityInSystems(InEntity, oldEntitySignature, newEntitySignature);
 
 	Logger::LogMessage(
 		"Component " + std::to_string(componentID) + 
@@ -308,7 +323,12 @@ template <typename TComponent>
 void ECSManager::RemoveComponent(Entity InEntity)
 {
 	assert(InEntity.GetID() < EntityComponentSignatures.size());
-	EntityComponentSignatures[InEntity.GetID()].set(Component<TComponent>::GetID(), false);
+
+	const auto entityID = InEntity.GetID();
+	const Signature oldSignature = EntityComponentSignatures[entityID];
+	const Signature newSignature = EntityComponentSignatures[entityID].set(Component<TComponent>::GetID(), false);
+
+	UpdateEntityInSystems(InEntity, oldSignature, newSignature);
 }
 
 template <typename TComponent>
@@ -316,8 +336,11 @@ TComponent& ECSManager::GetComponent(const Entity InEntity)
 {
 	assert(HasComponent<TComponent>(InEntity));
 	const auto entityId = InEntity.GetID();
-	const auto* componentPool = ComponentPools[Component<TComponent>::GetID()];
-	return *componentPool[entityId];
+	const auto componentId = Component<TComponent>::GetID();
+
+	std::shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(ComponentPools[componentId]);
+
+	return componentPool->Get(entityId);
 }
 
 template <typename TSystem, typename ...TArgs>
@@ -327,8 +350,7 @@ void ECSManager::AddSystem(TArgs&& ...Args)
 
 	if (Systems.count(systemIdx) == 0)
 	{
-		std::shared_ptr<TSystem> newSystem = std::make_unique<TSystem>(std::forward<TArgs>(Args)...);
-		Systems[systemIdx] = newSystem;
+		Systems[systemIdx] = std::make_shared<TSystem>(std::forward<TArgs>(Args)...);;
 	}
 }
 

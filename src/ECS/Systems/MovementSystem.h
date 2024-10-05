@@ -8,5 +8,6 @@ public:
 	MovementSystem();
 	~MovementSystem() = default;
 
-	void Update() override;
+	void Update(const float DeltaTime) override;
+	void AddVelocity(const float X, const float Y);
 };

@@ -44,7 +44,7 @@ public:
 private:
 	void Setup();
 	void ProcessInput();
-	void Update(const double DeltaTime);
+	void Update(const float DeltaTime);
 	void Render();
 	void Initialize();
 	void Run();

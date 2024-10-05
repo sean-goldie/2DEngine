@@ -23,9 +23,12 @@ void Game::Setup()
 	GameManager->AddSystem<MovementSystem>();
 
 	// test test test
+	// this will be game code here eventually
+	// so we'll want to do this from a subclass of Game
+
 	auto e = GameManager->CreateEntity();
 	e.AddComponent<TransformComponent>();
-	e.AddComponent<RigidBodyComponent>();
+	e.AddComponent<RigidBodyComponent>(glm::vec2(100.0, 100.0f));
 
 	Logger::LogMessage("Created entity with ID " + std::to_string(e.GetID()));
 
@@ -54,9 +57,9 @@ void Game::ProcessInput()
 	}
 }
 
-void Game::Update(const double DeltaTime)
+void Game::Update(const float DeltaTime)
 {
-	//GameManager->Update(DeltaTime);
+	GameManager->Update(DeltaTime);
 }
 
 void Game::Render()

@@ -28,7 +28,9 @@ struct SDLParameters
 };
 
 /**
- * Game instance singleton
+ * Abstract game instance base class. All games must inherit from this class.
+ * Keep in mind that if your game's class does not override Setup() with its
+ * systems and game objects, you will have no content!
  */
 class Game
 {
@@ -38,25 +40,36 @@ public:
 	/** Go!! */
 	void Play();
 
-	/** Resolution and display mode parameters */
-	SDLParameters DisplayParameters;
+	static SDL_Renderer* GetRenderer() { return SDLRenderer; }
+
+protected:
+	/** Generic setup routine. Game-specific logic can be extended in game classes. */
+	virtual void Setup();
+
+	/** Generic input routine. Game-specific logic can be extended in game classes. */
+	virtual void ProcessInput();
+
+	/** Generic update loop. Game-specific logic can be extended in game classes. */
+	virtual void Update(const float DeltaTime);
+
+	/** Generic render loop. Game-specific logic can be extended in game classes. */
+	virtual void Render(const float DeltaTime);
 
 private:
-	void Setup();
-	void ProcessInput();
-	void Update(const float DeltaTime);
-	void Render();
 	void Initialize();
 	void Run();
 	void Destroy();
 
+protected:
+	std::shared_ptr<ECSManager> GameManager = nullptr;
+	SDLParameters DisplayParameters;
+
+private:
 	bool IsRunning = false;
 
 	// Raw pointers returned from SDL C API
 	SDL_Window* SDLWindow = nullptr;
-	SDL_Renderer* SDLRenderer = nullptr;
-
-	std::shared_ptr<ECSManager> GameManager = nullptr;
+	static SDL_Renderer* SDLRenderer;
 
 	unsigned int MillisecsPreviousFrame = 0;
 };

@@ -224,7 +224,7 @@ public:
 	const bool HasSystem() const;
 
 	template <typename TSystem>
-	TSystem& GetSystem() const;
+	std::shared_ptr<TSystem> GetSystem() const;
 
 private:
 	void AddEntityToSystems(const Entity InEntity);
@@ -373,14 +373,22 @@ const bool ECSManager::HasSystem() const
 }
 
 template <typename TSystem>
-TSystem& ECSManager::GetSystem() const
+std::shared_ptr<TSystem> ECSManager::GetSystem() const
 {
 	const auto systemIdx = std::type_index(typeid(TSystem));
+	const auto systemItr = Systems.find(systemIdx);
 
-	if (Systems.count(systemIdx) && Systems[systemIdx] != nullptr)
+	if (systemItr != Systems.end())
 	{
-		return *static_ptr_cast<TSystem>(Systems[systemIdx]);
+		const auto& pair = *systemItr;
+
+		if (pair.second != nullptr)
+		{
+			return static_pointer_cast<TSystem>(pair.second);
+		}
 	}
+	
+	return nullptr;
 }
 
 template <typename TComponent>

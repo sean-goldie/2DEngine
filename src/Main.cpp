@@ -2,11 +2,11 @@
 #pragma optimize("", off)
 #endif
 
-#include "Game/Game.h"
+#include "Game/TestGame.h"
 
 int main(int argc, char* argv[])
 {
-    Game game;
+    TestGame game;
     game.Play();
 
     return 0;

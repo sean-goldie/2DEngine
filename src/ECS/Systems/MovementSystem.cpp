@@ -17,10 +17,6 @@ void MovementSystem::Update(const float DeltaTime)
 
 		transform.Position.x += rigidBody.Velocity.x * DeltaTime;
 		transform.Position.y += rigidBody.Velocity.y * DeltaTime;
-
-		Logger::LogMessage("Entity " + std::to_string(entity.GetID()) + 
-							" position is now " + std::to_string(transform.Position.x) +
-							',' + std::to_string(transform.Position.y));
 	}
 }
 

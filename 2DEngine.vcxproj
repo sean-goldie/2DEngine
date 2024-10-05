@@ -394,11 +394,16 @@
     <ClInclude Include="libs\sol\config.hpp" />
     <ClInclude Include="libs\sol\forward.hpp" />
     <ClInclude Include="libs\sol\sol.hpp" />
+    <ClInclude Include="src\ECS\Components\AllComponents.h" />
     <ClInclude Include="src\ECS\Components\RigidBodyComponent.h" />
+    <ClInclude Include="src\ECS\Components\SpriteComponent.h" />
     <ClInclude Include="src\ECS\Components\TransformComponent.h" />
     <ClInclude Include="src\ECS\ECS.h" />
+    <ClInclude Include="src\ECS\Systems\AllSystems.h" />
     <ClInclude Include="src\ECS\Systems\MovementSystem.h" />
+    <ClInclude Include="src\ECS\Systems\RenderSystem.h" />
     <ClInclude Include="src\Game\Game.h" />
+    <ClInclude Include="src\Game\TestGame.h" />
     <ClInclude Include="src\Util\CoreStatics.h" />
     <ClInclude Include="src\Logger\Logger.h" />
   </ItemGroup>
@@ -561,7 +566,9 @@
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\ECS\ECS.cpp" />
     <ClCompile Include="src\ECS\Systems\MovementSystem.cpp" />
+    <ClCompile Include="src\ECS\Systems\RenderSystem.cpp" />
     <ClCompile Include="src\Game\Game.cpp" />
+    <ClCompile Include="src\Game\TestGame.cpp" />
     <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>

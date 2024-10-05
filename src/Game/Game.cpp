@@ -1,10 +1,9 @@
 #include <SDL.h>
 #include "Game.h"
 #include "Util/CoreStatics.h"
-#include "Logger/Logger.h"
-#include "ECS/Components/TransformComponent.h"
-#include "ECS/Components/RigidBodyComponent.h"
-#include "ECS/Systems/MovementSystem.h"
+#include "ECS/Systems/RenderSystem.h"
+
+SDL_Renderer* Game::SDLRenderer = nullptr;
 
 Game::Game()
 {
@@ -20,17 +19,6 @@ void Game::Play()
 
 void Game::Setup()
 {
-	GameManager->AddSystem<MovementSystem>();
-
-	// test test test
-	// this will be game code here eventually
-	// so we'll want to do this from a subclass of Game
-
-	auto e = GameManager->CreateEntity();
-	e.AddComponent<TransformComponent>();
-	e.AddComponent<RigidBodyComponent>(glm::vec2(100.0, 100.0f));
-
-	Logger::LogMessage("Created entity with ID " + std::to_string(e.GetID()));
 
 }
 
@@ -62,9 +50,14 @@ void Game::Update(const float DeltaTime)
 	GameManager->Update(DeltaTime);
 }
 
-void Game::Render()
+void Game::Render(const float DeltaTime)
 {
-
+	SDL_SetRenderDrawColor(SDLRenderer, 21, 21, 21, 255);
+	SDL_RenderClear(SDLRenderer);
+	if (auto renderSystem = GameManager->GetSystem<RenderSystem>())
+	{
+		renderSystem->Update(DeltaTime);
+	}
 }
 
 void Game::Initialize()
@@ -140,12 +133,14 @@ void Game::Run()
 		const unsigned MillisecsCurrentFrame = SDL_GetTicks();		
 
 		// Convert to seconds for ease of use (conceptually, things should happen "per second")
-		Update((MillisecsCurrentFrame - MillisecsPreviousFrame) * CoreStatics::OneMillisec);
+		const float deltaTime = (MillisecsCurrentFrame - MillisecsPreviousFrame) * CoreStatics::OneMillisec;
+
+		Update(deltaTime);
 		
 		// Cache current milliseconds per frame to calculate next delta time
 		MillisecsPreviousFrame = MillisecsCurrentFrame;
 
-		Render();
+		Render(deltaTime);
 	}
 }
 

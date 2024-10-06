@@ -2,7 +2,6 @@
 
 #include "Logger/Logger.h"
 #include "Util/CoreStatics.h"
-#include "Util/Typedef.h"
 
 // Unfortunately all these things have to be included here as we are using typedefs and
 // smart pointers and things, and this file contains template implementations
@@ -12,6 +11,9 @@
 #include <typeindex>
 #include <set>
 #include <memory>
+#include <bitset>
+
+typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
 
 /**
  * Entity class. Basically just an ID.
@@ -232,7 +234,7 @@ private:
 	std::vector<Signature> EntityComponentSignatures;
 
 	/**
-	 * System map doesn't need to be ordered, since systems have no ID.
+	 * TODO: refactor to use vector, not sure this implementation makes sense
 	 */
 	 std::unordered_map<std::type_index, System*> Systems;
 
@@ -268,10 +270,10 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 		ComponentPools[componentID] = new Pool<TComponent>();
 	}
 
-	Pool<TComponent>* componentPool = (Pool<TComponent>*)(ComponentPools[componentID]);
+	Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>((ComponentPools[componentID]));
 
 	// Bounds check on this particular pool
-	if (entityID >= (unsigned)componentPool->Size()) // blah warning blah
+	if (entityID >= static_cast<unsigned int>(componentPool->Size())) // blah warning blah
 	{
 		componentPool->Resize(entityID + 1);
 	}
@@ -326,7 +328,7 @@ TComponent& ECSManager::GetComponent(const Entity InEntity)
 	const auto entityId = InEntity.GetID();
 	const auto componentId = Component<TComponent>::GetID();
 
-	Pool<TComponent>* componentPool = (Pool<TComponent>*)(ComponentPools[componentId]);
+	Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>((ComponentPools[componentId]));
 
 	return componentPool->Get(entityId);
 }
@@ -372,7 +374,7 @@ TSystem* ECSManager::GetSystem() const
 
 		if (pair.second != nullptr)
 		{
-			return (TSystem*)(pair.second);
+			return static_cast<TSystem*>(pair.second);
 		}
 	}
 	

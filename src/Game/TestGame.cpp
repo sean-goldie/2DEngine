@@ -2,6 +2,8 @@
 #include "ECS/Components/AllComponents.h"
 #include "ECS/Systems/AllSystems.h"
 
+typedef glm::vec2 Vector2;
+
 void TestGame::Setup()
 {
 	Game::Setup();

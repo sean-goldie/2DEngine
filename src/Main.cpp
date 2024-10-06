@@ -6,6 +6,8 @@
 
 int main(int argc, char* argv[])
 {
+    // TODO replace this with Game again
+    // Any game using this engine will have to place their subclass of Game here
     TestGame game;
     game.Play();
 

@@ -82,21 +82,24 @@ void ECSManager::RemoveEntityFromSystems(const Entity InEntity)
 
 void ECSManager::UpdateEntityInSystems(const Entity InEntity, const Signature& Old, const Signature& New)
 {
-	for (const auto& [typeIndex, system] : Systems)
+	if (Old != New)
 	{
-		const Signature& systemSignature = system->GetComponentSignature();
-		if ((systemSignature & Old) == systemSignature)
+		for (const auto& [typeIndex, system] : Systems)
 		{
-			system->RemoveEntity(InEntity);
+			const Signature& systemSignature = system->GetComponentSignature();
+			if ((systemSignature & Old) == systemSignature)
+			{
+				system->RemoveEntity(InEntity);
+			}
 		}
-	}
 
-	for (const auto& [typeIndex, system] : Systems)
-	{
-		const Signature& systemSignature = system->GetComponentSignature();
-		if ((systemSignature & New) == systemSignature)
+		for (const auto& [typeIndex, system] : Systems)
 		{
-			system->AddEntity(InEntity);
+			const Signature& systemSignature = system->GetComponentSignature();
+			if ((systemSignature & New) == systemSignature)
+			{
+				system->AddEntity(InEntity);
+			}
 		}
 	}
 }

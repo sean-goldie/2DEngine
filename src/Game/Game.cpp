@@ -1,13 +1,22 @@
 #include <SDL.h>
+#include <fstream>
+#include <ostream>
 #include "Game.h"
+#include "Asset/AssetStore.h"
 #include "Util/CoreStatics.h"
-#include "ECS/Systems/RenderSystem.h"
+#include "ECS/Systems/RenderSystem.h" // includes ECS.h
+#include "glm/glm.hpp"
+#include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/SpriteComponent.h"
 
+ECSManager* Game::GameManager = nullptr;
+AssetStore* Game::AssetManager = nullptr;
 SDL_Renderer* Game::SDLRenderer = nullptr;
 
 Game::Game()
 {
 	GameManager = new ECSManager;
+	AssetManager = new AssetStore;
 }
 
 void Game::Play()
@@ -52,12 +61,102 @@ void Game::Update(const float DeltaTime)
 
 void Game::Render(const float DeltaTime)
 {
-	SDL_SetRenderDrawColor(SDLRenderer, 21, 21, 21, 255);
-	SDL_RenderClear(SDLRenderer);
-	if (auto renderSystem = GameManager->GetSystem<RenderSystem>())
+
+}
+
+void Game::LoadLevel(const std::string& TilemapTextureID, const std::string& MapFilePath)
+{
+	const SDL_Texture* tilemapTexture = AssetManager->GetTexture(TilemapTextureID);
+
+	if (tilemapTexture == nullptr)
 	{
-		renderSystem->Update(DeltaTime);
+		Logger::LogError("Couldn't retrieve tilemap texture with ID " + TilemapTextureID);
 	}
+
+	// Open the map file
+	std::fstream mapFile(MapFilePath);
+
+	if (mapFile.is_open() == false)
+	{
+		Logger::LogError("Couldn't open map file at location " + MapFilePath);
+	}
+
+	std::vector<std::vector<std::string>> tileValues;
+	int mapNumRows = 0;
+	int mapNumCols = 0;
+
+	std::string currentLine;
+	while (std::getline(mapFile, currentLine))
+	{
+		tileValues.push_back(std::vector<std::string>());
+
+		int currentCol = 0;
+		std::string currentVal;
+
+		for (const char c : currentLine)
+		{
+			if (c != ',')
+			{
+				currentVal += c;
+			}
+			else
+			{
+				tileValues[mapNumRows].push_back(currentVal);
+				currentVal = "";
+				++currentCol;
+			}
+		}
+
+		if (mapNumCols == 0)
+		{
+			mapNumCols = currentCol;
+		}
+
+		++mapNumRows;
+	}
+
+	const int tileSize = 32;
+	const double tileScale = (
+		static_cast<double>(DisplayParameters.WindowWidth) / 
+		static_cast<double>(mapNumRows * tileSize)
+	);
+
+	int y = 0;
+	for (const std::vector<std::string>& col : tileValues)
+	{
+		int x = 0;
+		for (const std::string& row : col)
+		{
+			// Should always pass - first char is encoded column number, second is row
+			if (row.length() == 2)
+			{
+				int currentSrcRectY = (row[0] - '0') * tileSize;
+				int currentSrcRectX = (row[1] - '0') * tileSize;
+
+				Entity tile = GameManager->CreateEntity();
+
+				tile.AddComponent<TransformComponent>(
+					Vector2(										// Position
+						x++ * tileScale * tileSize, 
+						y * tileScale * tileSize
+					),
+					Vector2(tileScale, tileScale)					// Scale
+				);
+
+				tile.AddComponent<SpriteComponent>(
+					"Tilemap",										// Sprite AssetID
+					tileSize, tileSize,								// Width, Height
+					currentSrcRectX,
+					currentSrcRectY,
+					-1												// ZOrder (draw layer)
+				);
+			}
+		}
+		++y;
+	}
+
+	mapFile.close();
+
 }
 
 void Game::Initialize()
@@ -66,12 +165,6 @@ void Game::Initialize()
 	{
 		Logger::LogFatal("SDL failed to initialize");
 		return;
-	}
-
-	// My preference is to debug in Windowed. So I built that into the engine for now :)
-	if (CoreStatics::IsDebugBuild)
-	{
-		DisplayParameters.WindowedMode = SDLParameters::EWindowedMode::Windowed;
 	}
 
 	if (DisplayParameters.WindowedMode == SDLParameters::EWindowedMode::FullscreenMaxRes)
@@ -151,4 +244,5 @@ void Game::Destroy()
 	SDL_Quit();
 
 	delete GameManager;
+	delete AssetManager;
 }

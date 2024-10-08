@@ -1,10 +1,12 @@
 #pragma once
 
-#include <memory>
-#include "ECS/ECS.h" // Must be included here to allocate unique_ptr<ECSManager>
+#include <string>
+#include <unordered_map>
 
 struct SDL_Window;
 struct SDL_Renderer;
+class ECSManager;
+class AssetStore;
 
 /**
  * Rendering settings. Fullscreen mode is enabled by default.
@@ -25,6 +27,8 @@ struct SDLParameters
 	 */
 	int WindowWidth = 1920;
 	int WindowHeight = 1080;
+	//int WindowWidth = 800;
+	//int WindowHeight = 640;
 };
 
 /**
@@ -40,6 +44,8 @@ public:
 	/** Go!! */
 	void Play();
 
+	static ECSManager* GetGameManager() { return GameManager; }
+	static AssetStore* GetAssetManager() { return AssetManager; }
 	static SDL_Renderer* GetRenderer() { return SDLRenderer; }
 
 protected:
@@ -55,21 +61,23 @@ protected:
 	/** Generic render loop. Game-specific logic can be extended in game classes. */
 	virtual void Render(const float DeltaTime);
 
+	/** Load a new level using string ID TilemapTextureID and a map file at MapFilePath */
+	void LoadLevel(const std::string& TilemapTextureID, const std::string& MapFilePath);
+
+	/** Display parameters. Can be edited from game subclasses of this class. */
+	SDLParameters DisplayParameters;
+
+	static ECSManager* GameManager;
+	static AssetStore* AssetManager;
+	static SDL_Renderer* SDLRenderer;
+
 private:
 	void Initialize();
 	void Run();
 	void Destroy();
 
-protected:
-	ECSManager* GameManager = nullptr;
-	SDLParameters DisplayParameters;
-
 private:
 	bool IsRunning = false;
-
-	// Raw pointers returned from SDL C API
 	SDL_Window* SDLWindow = nullptr;
-	static SDL_Renderer* SDLRenderer;
-
 	unsigned int MillisecsPreviousFrame = 0;
 };

@@ -819,10 +819,7 @@
     <ClInclude Include="src\ECS\Systems\AllSystems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Util\Typedef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Asset\AssetManager.h">
+    <ClInclude Include="src\Asset\AssetStore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1280,7 +1277,7 @@
     <ClCompile Include="src\Game\TestGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Asset\AssetManager.cpp">
+    <ClCompile Include="src\Asset\AssetStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

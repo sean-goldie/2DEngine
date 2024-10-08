@@ -394,7 +394,7 @@
     <ClInclude Include="libs\sol\config.hpp" />
     <ClInclude Include="libs\sol\forward.hpp" />
     <ClInclude Include="libs\sol\sol.hpp" />
-    <ClInclude Include="src\Asset\AssetManager.h" />
+    <ClInclude Include="src\Asset\AssetStore.h" />
     <ClInclude Include="src\ECS\Components\AllComponents.h" />
     <ClInclude Include="src\ECS\Components\RigidBodyComponent.h" />
     <ClInclude Include="src\ECS\Components\SpriteComponent.h" />
@@ -407,7 +407,6 @@
     <ClInclude Include="src\Game\TestGame.h" />
     <ClInclude Include="src\Util\CoreStatics.h" />
     <ClInclude Include="src\Logger\Logger.h" />
-    <ClInclude Include="src\Util\Typedef.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libavif-16.dll" />
@@ -566,7 +565,7 @@
     <ClCompile Include="libs\imgui\imgui_draw.cpp" />
     <ClCompile Include="libs\imgui\imgui_sdl.cpp" />
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\Asset\AssetManager.cpp" />
+    <ClCompile Include="src\Asset\AssetStore.cpp" />
     <ClCompile Include="src\ECS\ECS.cpp" />
     <ClCompile Include="src\ECS\Systems\MovementSystem.cpp" />
     <ClCompile Include="src\ECS\Systems\RenderSystem.cpp" />

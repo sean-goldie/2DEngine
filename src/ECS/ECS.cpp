@@ -1,16 +1,19 @@
 #include "ECS.h"
 
 unsigned int Entity::NumEntities = 0;
-unsigned int IComponent::NumComponents = 0;
+unsigned int IComponent::NumComponentTypes = 0;
 
-void System::AddEntity(Entity InEntity)
+void System::AddEntity(const Entity InEntity)
 {
 	Entities.push_back(InEntity);
 }
 
-void System::RemoveEntity(Entity InEntity)
+void System::RemoveEntity(const Entity InEntity)
 {
-	Entities.erase(Entities.begin() + InEntity.GetID());
+	if (Entities.size() > InEntity.GetID())
+	{
+		Entities.erase(Entities.begin() + InEntity.GetID());
+	}
 }
 
 ECSManager::ECSManager()

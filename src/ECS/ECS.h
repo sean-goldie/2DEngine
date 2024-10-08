@@ -2,18 +2,14 @@
 
 #include "Logger/Logger.h"
 #include "Util/CoreStatics.h"
-
-// Unfortunately all these things have to be included here as we are using typedefs and
-// smart pointers and things, and this file contains template implementations
 #include <vector>
-#include <assert.h>
+#include <cassert>
 #include <unordered_map>
 #include <typeindex>
 #include <set>
-#include <memory>
 #include <bitset>
 
-typedef std::bitset<CoreStatics::MaxNumComponents> Signature;
+typedef std::bitset<CoreStatics::MaxNumComponentTypes> Signature;
 
 /**
  * Entity class. Basically just an ID.
@@ -28,7 +24,7 @@ public:
 	Entity(class ECSManager* Owner) : 
 		EntityID(NumEntities++), 
 		Owner(Owner)
-	{ 
+	{
 		assert(NumEntities < CoreStatics::MaxNumEntities); 
 	}
 
@@ -39,7 +35,11 @@ public:
 	bool operator<(const Entity& Other) const { return EntityID < Other.GetID(); }
 	bool operator>(const Entity& Other) const { return EntityID > Other.GetID(); }
 
-	/** Wrappers for ease of use. Optional args forwarded to the component's constructor */
+	/**
+	 * Optional params are forwarded to the constructor of TComponent.
+	 * Make sure they are present and correct if TComponent's constructor
+	 * does not have defaults!
+	 */
 	template <typename TComponent, typename ...TArgs>
 	void AddComponent(TArgs&& ...Args);
 
@@ -61,42 +61,46 @@ private:
 };
 
 /**
- * Abstract interface for all components that just keeps track of the current
- * NumComponents to assign out as IDs. 
+ * Interface for all components that just keeps track of the current
+ * NumComponentTypes to be assigned out as IDs. 
  * 
  * Possible TODO: data structure note above
  */
 class IComponent
 {
 protected:
-	static unsigned int NumComponents; // = 0;
+	static unsigned int NumComponentTypes; // = 0;
 };
 
 /**
  * Component with a specific ID
- * NumComponents must live in IComponent because Component is templated.
+ * NumComponents must live in IComponent because Component are templates.
  * 
  * This is why we have to have this weird GetID declaration of the ComponentID
- * for each templated TComponent. Putting the ID assignment in the constructor
+ * for each template TComponent. Putting the ID assignment in the constructor
  * throws unresolved external symbol.
  * 
- * We need templated Components in order that each type can naively have an ID
+ * We need template Components in order that each type can naively have an ID
  * (whereas we don't need to do this for entities since there are not multiple
- * types of Entities, or for Systems because we are using type_index as keys there)
+ * types of Entities, or for Systems because we do not need a System ID)
  * 
- * Possibly this could be refactored to work similarly to Systems in the future,
- * but this implementation is taken from the course and so it's what I'm going with 
- * for now.
+ * Can't use a type_index map like Systems because we are currently using the ComponentID
+ * as a bitset in the signature. Refactoring the whole ECS framework to use an unlimited
+ * number of components by having a signature as a data structure rather than a single
+ * data type may allow for revisiting all of this in the future.
  */
  template <typename TComponent>
 class Component : IComponent
 {
 public:
-	Component() { assert(NumComponents + 1 < CoreStatics::MaxNumComponents); }
+	Component() 
+	{
+		assert(NumComponentTypes + 1 < CoreStatics::MaxNumComponentTypes); 
+	}
 
 	static unsigned int GetID()
 	{ 
-		static auto ComponentID = NumComponents++;
+		static auto ComponentID = NumComponentTypes++;
 		return ComponentID;
 	}
 };
@@ -107,10 +111,10 @@ public:
 class System
 {
 public:
-	void AddEntity(Entity EntityToAdd);
-	void RemoveEntity(Entity EntityToRemove);
+	virtual void AddEntity(const Entity EntityToAdd);
+	void RemoveEntity(const Entity EntityToRemove);
 
-	const std::vector<Entity>& GetEntities() const { return Entities; }
+	std::vector<Entity>& GetEntities() { return Entities; }
 	const Signature& GetComponentSignature() const { return ComponentSignature; }
 
 	virtual void Update(const float DeltaTime) = 0;

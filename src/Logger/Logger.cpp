@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <chrono>
 #include <time.h>
+#include <cassert>
 
 static auto DateTime = new char[26];
 
@@ -38,6 +39,7 @@ void Logger::LogFatal(const std::string& ftl)
 {
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
 	InternalLog("FATAL", ftl.c_str());
+	assert(false);
 }
 
 void Logger::InternalLog(const char* pre, const char* msg)

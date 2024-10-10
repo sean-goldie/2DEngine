@@ -25,7 +25,7 @@ public:
 	/**
 	 * The rectangle on the source texture from which to pull this asset's sprite.
 	 * Measured in pixels from the top left corner of the texture (0,0) down to (Width,Height) 
-	 * pixels. Default is (0, 0).
+	 * pixels. Default is (0,0).
 	 */
 	SDL_Rect SourceRect;
 

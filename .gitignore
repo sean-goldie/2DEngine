@@ -6,6 +6,10 @@
 # Assets for test game
 assets/
 
+# Visual Studio project files
+*.vcxproj
+*.filters
+
 # User-specific files
 *.rsuser
 *.suo

@@ -265,7 +265,7 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 	// Bounds check on the array of pools, allocate nullptrs as needed
 	if (componentID >= ComponentPools.size())
 	{
-		ComponentPools.resize(componentID + 1, nullptr);
+		ComponentPools.resize(ComponentPools.size() * 2, nullptr);
 	}
 
 	// If we needed to add nullptrs, allocate a new Pool and store it
@@ -290,7 +290,7 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 
 	if (entityID >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(entityID + 1);
+		EntityComponentSignatures.resize(EntityComponentSignatures.size() * 2);
 	}
 
 	// Capture the old signature

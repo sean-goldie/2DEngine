@@ -42,7 +42,7 @@ Entity ECSManager::CreateEntity()
 
 	if (entity.GetID() >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(NumEntities);
+		EntityComponentSignatures.resize(EntityComponentSignatures.size() * 2);
 	}
 
 	return entity;

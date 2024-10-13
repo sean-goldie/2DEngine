@@ -5,14 +5,26 @@ unsigned int IComponent::NumComponentTypes = 0;
 
 void System::AddEntity(const Entity InEntity)
 {
-	Entities.push_back(InEntity);
+	const auto entityID = InEntity.GetID();
+	if (Entities.size() > entityID)
+	{
+		if (Entities[entityID] != InEntity)
+		{
+			Entities[entityID] = InEntity;
+		}
+	}
+	else
+	{
+		Entities.push_back(InEntity);
+	}
 }
 
 void System::RemoveEntity(const Entity InEntity)
 {
-	if (Entities.size() > InEntity.GetID())
+	const auto entityID = InEntity.GetID();
+	if (Entities.size() > entityID)
 	{
-		Entities.erase(Entities.begin() + InEntity.GetID());
+		Entities.erase(Entities.begin() + entityID);
 	}
 }
 
@@ -42,7 +54,7 @@ Entity ECSManager::CreateEntity()
 
 	if (entity.GetID() >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(EntityComponentSignatures.size() * 2);
+		EntityComponentSignatures.resize(entity.GetID() * 2);
 	}
 
 	return entity;

@@ -70,5 +70,4 @@ void RenderSystem::AddEntity(const Entity InEntity)
 	{
 		entities.push_back(InEntity);
 	}
-
 }

@@ -13,15 +13,16 @@ typedef std::bitset<CoreStatics::MaxNumComponentTypes> Signature;
 
 /**
  * Entity class. Basically just an ID.
- * We will pass systems COPIES of this class to store rather than pointers, since
- * the class itself is just a wrapper around plain old data.
- * Holds the current number of entities as well as the max number (size of uint32)
+ * We will generally pass around COPIES of this class to store rather than pointers, since
+ * the class itself is just a wrapper around plain old data and it wouldn't be meaningfully
+ * more efficient to allocate a pointer or reference to it.
+ * Holds the current number of entities as well as the max number (32)
  * which also serves as the NullID.
  */
 class Entity
 {
 public:
-	Entity(class ECSManager* Owner) : 
+	Entity(class ECSManager* Owner = nullptr) : 
 		EntityID(NumEntities++), 
 		Owner(Owner)
 	{
@@ -37,8 +38,6 @@ public:
 
 	/**
 	 * Optional params are forwarded to the constructor of TComponent.
-	 * Make sure they are present and correct if TComponent's constructor
-	 * does not have defaults!
 	 */
 	template <typename TComponent, typename ...TArgs>
 	void AddComponent(TArgs&& ...Args);
@@ -57,7 +56,7 @@ protected:
 
 private:
 	unsigned int EntityID;
-	ECSManager* Owner;
+	ECSManager* Owner = nullptr;
 };
 
 /**
@@ -207,8 +206,6 @@ public:
 
 	/**
 	 * Optional params are forwarded to the constructor of TSystem.
-	 * Make sure they are present and correct if TSystem's constructor 
-	 * does not have defaults!
 	 */
 	template <typename TSystem, typename ...TArgs>
 	void AddSystem(TArgs&& ...Args);
@@ -265,7 +262,8 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 	// Bounds check on the array of pools, allocate nullptrs as needed
 	if (componentID >= ComponentPools.size())
 	{
-		ComponentPools.resize(ComponentPools.size() * 2, nullptr);
+		const auto newSize = (ComponentPools.size() > 0) ? ComponentPools.size() * 2 : 32;
+		ComponentPools.resize(newSize, nullptr);
 	}
 
 	// If we needed to add nullptrs, allocate a new Pool and store it
@@ -279,7 +277,14 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 	// Bounds check on this particular pool
 	if (entityID >= static_cast<unsigned int>(componentPool->Size())) // blah warning blah
 	{
-		componentPool->Resize(entityID + 1);
+		if (entityID > 0)
+		{
+			componentPool->Resize(entityID * 2);
+		}
+		else
+		{
+			componentPool->Resize(32);
+		}
 	}
 
 	// Make a new component to assign to the entity, forwarding constructor args if they are present
@@ -290,7 +295,14 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 
 	if (entityID >= EntityComponentSignatures.size())
 	{
-		EntityComponentSignatures.resize(EntityComponentSignatures.size() * 2);
+		if (entityID > 0)
+		{
+			EntityComponentSignatures.resize(entityID * 2);
+		}
+		else
+		{
+			EntityComponentSignatures.resize(32);
+		}
 	}
 
 	// Capture the old signature
@@ -395,23 +407,28 @@ void System::RequireComponent()
 template <typename TComponent, typename ...TArgs>
 void Entity::AddComponent(TArgs&& ...Args)
 {
+	assert(Owner != nullptr);
 	Owner->AddComponent<TComponent>(*this, std::forward<TArgs>(Args)...);
+
 }
 
 template <typename TComponent>
 void Entity::RemoveComponent()
 {
+	assert(Owner != nullptr);
 	Owner->RemoveComponent<TComponent>(*this);
 }
 
 template <typename TComponent>
 const bool Entity::HasComponent() const
 {
+	assert(Owner != nullptr);
 	return Owner->HasComponent<TComponent>(*this);
 }
 
 template <typename TComponent>
 TComponent& Entity::GetComponent() const
 {
+	assert(Owner != nullptr);
 	return Owner->GetComponent<TComponent>(*this);
 }

@@ -45,7 +45,6 @@ void Logger::LogFatal(const std::string& ftl)
 void Logger::InternalLog(const char* pre, const char* msg)
 {
 	const auto timeNow = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	//char dateTime[26];
 
 	if (ctime_s(DateTime, 26, &timeNow) == 0)
 	{

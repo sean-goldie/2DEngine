@@ -1,6 +1,13 @@
 #include "TestGame.h"
-#include "ECS/Components/AllComponents.h"
-#include "ECS/Systems/AllSystems.h"
+#include "ECS/Systems/MovementSystem.h"
+#include "ECS/Systems/AnimationSystem.h"
+#include "ECS/Systems/RenderSystem.h"
+#include "ECS/Systems/BoxCollisionSystem.h"
+#include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/AnimationComponent.h"
+#include "ECS/Components/RigidBodyComponent.h"
+#include "ECS/Components/SpriteComponent.h"
+#include "ECS/Components/BoxColliderComponent.h"
 #include "Asset/AssetStore.h"
 
 TestGame::TestGame()
@@ -15,6 +22,8 @@ void TestGame::Setup()
 
 	GameManager->AddSystem<MovementSystem>();
 	GameManager->AddSystem<RenderSystem>();
+	GameManager->AddSystem<AnimationSystem>();
+	GameManager->AddSystem<BoxCollisionSystem>();
 
 	const std::string tilemapDir = "./assets/tilemaps/";
 
@@ -29,16 +38,31 @@ void TestGame::Setup()
 	AssetManager->SetTexturePath("./assets/images/");
 	AssetManager->AddTexture("tank-image", "tank-panther-right.png");
 	AssetManager->AddTexture("truck-image", "truck-ford-right.png");
+	AssetManager->AddTexture("chopper-image", "chopper.png");
+	AssetManager->AddTexture("radar-image", "radar.png");
 
 	// test test test
 
 	Entity tank = GameManager->CreateEntity();
-	tank.AddComponent<TransformComponent>(Vector2(10.0, 10.0), Vector2(1.0, 1.0), 0.0);
-	tank.AddComponent<RigidBodyComponent>(Vector2(10.0, 0.0));
+	tank.AddComponent<TransformComponent>(Vector2(1000.0, 500.0), Vector2(1.0, 1.0), 0.0);
+	tank.AddComponent<RigidBodyComponent>(Vector2(-30.0, 0.0));
 	tank.AddComponent<SpriteComponent>("tank-image");
+	tank.AddComponent<BoxColliderComponent>(32, 32);
 
-	Entity truck = GameManager->CreateEntity();
-	truck.AddComponent<TransformComponent>(Vector2(50.0, 100.0), Vector2(1.0, 1.0), 0.0);
-	truck.AddComponent<RigidBodyComponent>(Vector2(0.0, 10.0));
-	truck.AddComponent<SpriteComponent>("truck-image");
+	//Entity truck = GameManager->CreateEntity();
+	//truck.AddComponent<TransformComponent>(Vector2(500.0, 500.0), Vector2(1.0, 1.0), 0.0);
+	//truck.AddComponent<RigidBodyComponent>(Vector2(20.0, 0.0));
+	//truck.AddComponent<SpriteComponent>("truck-image");
+	//truck.AddComponent<BoxColliderComponent>(32, 32);
+
+	Entity helicopter = GameManager->CreateEntity();
+	helicopter.AddComponent<TransformComponent>(Vector2(75.0, 100.0), Vector2(1.0, 1.0), 0.0);
+	helicopter.AddComponent<RigidBodyComponent>(Vector2(10.0, 10.0));
+	helicopter.AddComponent<SpriteComponent>("chopper-image");
+	helicopter.AddComponent<AnimationComponent>(2);
+
+	Entity radar = GameManager->CreateEntity();
+	radar.AddComponent<TransformComponent>(Vector2(500.0, 250.0), Vector2(2.0, 2.0), 0.0);
+	radar.AddComponent<SpriteComponent>("radar-image", 64, 64);
+	radar.AddComponent<AnimationComponent>(8);
 }

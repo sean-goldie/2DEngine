@@ -8,6 +8,7 @@
 #include <typeindex>
 #include <set>
 #include <bitset>
+#include <unordered_set>
 
 typedef std::bitset<CoreStatics::MaxNumComponentTypes> Signature;
 
@@ -125,6 +126,7 @@ protected:
 private:
 	Signature ComponentSignature;
 	std::vector<Entity> Entities;
+	std::unordered_set<unsigned int> EntityIDs;
 };
 
 /**

@@ -49,11 +49,11 @@ void TestGame::Setup()
 	tank.AddComponent<SpriteComponent>("tank-image");
 	tank.AddComponent<BoxColliderComponent>(32, 32);
 
-	//Entity truck = GameManager->CreateEntity();
-	//truck.AddComponent<TransformComponent>(Vector2(500.0, 500.0), Vector2(1.0, 1.0), 0.0);
-	//truck.AddComponent<RigidBodyComponent>(Vector2(20.0, 0.0));
-	//truck.AddComponent<SpriteComponent>("truck-image");
-	//truck.AddComponent<BoxColliderComponent>(32, 32);
+	Entity truck = GameManager->CreateEntity();
+	truck.AddComponent<TransformComponent>(Vector2(500.0, 500.0), Vector2(1.0, 1.0), 0.0);
+	truck.AddComponent<RigidBodyComponent>(Vector2(20.0, 0.0));
+	truck.AddComponent<SpriteComponent>("truck-image");
+	truck.AddComponent<BoxColliderComponent>(32, 32);
 
 	Entity helicopter = GameManager->CreateEntity();
 	helicopter.AddComponent<TransformComponent>(Vector2(75.0, 100.0), Vector2(1.0, 1.0), 0.0);

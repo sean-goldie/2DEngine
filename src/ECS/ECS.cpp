@@ -6,15 +6,10 @@ unsigned int IComponent::NumComponentTypes = 0;
 void System::AddEntity(const Entity InEntity)
 {
 	const auto entityID = InEntity.GetID();
-	if (Entities.size() > entityID)
+
+	if (EntityIDs.count(entityID) == 0)
 	{
-		if (Entities[entityID] != InEntity)
-		{
-			Entities[entityID] = InEntity;
-		}
-	}
-	else
-	{
+		EntityIDs.insert(entityID);
 		Entities.push_back(InEntity);
 	}
 }
@@ -22,9 +17,11 @@ void System::AddEntity(const Entity InEntity)
 void System::RemoveEntity(const Entity InEntity)
 {
 	const auto entityID = InEntity.GetID();
-	if (Entities.size() > entityID)
+
+	if (EntityIDs.count(entityID))
 	{
-		Entities.erase(Entities.begin() + entityID);
+		EntityIDs.erase(entityID);
+		Entities.erase(std::find(Entities.begin(), Entities.end(), InEntity));
 	}
 }
 

@@ -150,19 +150,19 @@ void Game::LoadLevel(const std::string& TilemapTextureID, const std::string& Map
                 Entity tile = GameManager->CreateEntity();
 
                 tile.AddComponent<TransformComponent>(
-                    Vector2(										// Position
+                    Vector2(
                         x++ * tileScale * tileSize, 
                         y * tileScale * tileSize
                     ),
-                    Vector2(tileScale, tileScale)					// Scale
+                    Vector2(tileScale, tileScale)
                 );
 
                 tile.AddComponent<SpriteComponent>(
-                    "Tilemap",										// Sprite AssetID
-                    tileSize, tileSize,								// Width, Height
+                    "Tilemap",
+                    tileSize, tileSize,
                     currentSrcRectX,
                     currentSrcRectY,
-                    -1												// ZOrder (draw layer)
+                    -1
                 );
             }
         }
@@ -185,19 +185,19 @@ void Game::Initialize()
     {
         // For maximum possible resolution settings, query the display to find its dimensions
         SDL_DisplayMode displayMode;
-        SDL_GetCurrentDisplayMode(0, &displayMode); // Only getting 0th display for now
+        SDL_GetCurrentDisplayMode(0, &displayMode);
 
         DisplayParameters.WindowWidth = displayMode.w;
         DisplayParameters.WindowHeight = displayMode.h;
     }
 
     SDLWindow = SDL_CreateWindow(
-        nullptr,						// Window title 
-        SDL_WINDOWPOS_CENTERED,			// X location
-        SDL_WINDOWPOS_CENTERED,			// Y location
-        DisplayParameters.WindowWidth,	// Width
-        DisplayParameters.WindowHeight, // Height
-        0								// Flags
+        nullptr,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        DisplayParameters.WindowWidth,
+        DisplayParameters.WindowHeight,
+        0
     );
 
     if (SDLWindow == nullptr)
@@ -207,10 +207,9 @@ void Game::Initialize()
     }
 
     SDLRenderer = SDL_CreateRenderer(
-        SDLWindow,	// Window to render
-        -1,			// Index of display/driver to use (-1 is default)
+        SDLWindow,
+        -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-        // Renderer flags - try to use GPU and VSync if possible
     );
 
     if (SDLRenderer == nullptr)

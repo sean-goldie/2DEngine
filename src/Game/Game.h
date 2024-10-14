@@ -32,8 +32,6 @@ struct SDLParameters
      */
     int WindowWidth = 1920;
     int WindowHeight = 1080;
-    //int WindowWidth = 800;
-    //int WindowHeight = 640;
 };
 
 /**

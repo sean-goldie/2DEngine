@@ -5,6 +5,33 @@
 
 #include "ECS.h"
 
+Entity::Entity(class ECSManager* Owner /*= nullptr*/) : Owner(Owner)
+{
+	assert(++NumEntities < CoreStatics::MaxNumEntities);
+
+	if (Owner != nullptr)
+	{
+		auto& freeIDs = Owner->GetFreeEntityIDs();
+		if (freeIDs.empty() == false)
+		{
+			EntityID = freeIDs.front();
+			freeIDs.pop();
+		}
+		else
+		{
+			EntityID = NumEntities;
+		}
+	}
+}
+
+void Entity::Kill() const
+{
+	if (Owner != nullptr)
+	{
+		Owner->DestroyEntity(*this);
+	}
+}
+
 unsigned int Entity::NumEntities = 0;
 unsigned int IComponent::NumComponentTypes = 0;
 
@@ -65,6 +92,7 @@ Entity ECSManager::CreateEntity()
 void ECSManager::DestroyEntity(Entity InEntity)
 {
 	EntitiesToBeRemoved.insert(InEntity);
+	FreeEntityIDs.push(InEntity.GetID());
 }
 
 void ECSManager::AddEntityToSystems(const Entity InEntity)
@@ -132,6 +160,7 @@ void ECSManager::Update(const float DeltaTime)
 	for (const Entity& entity : EntitiesToBeRemoved)
 	{
 		RemoveEntityFromSystems(entity);
+		EntityComponentSignatures[entity.GetID()].reset();
 	}
 	EntitiesToBeRemoved.clear();
 

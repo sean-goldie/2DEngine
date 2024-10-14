@@ -14,6 +14,7 @@
 #include <set>
 #include <bitset>
 #include <unordered_set>
+#include <queue>
 
 typedef std::bitset<CoreStatics::MaxNumComponentTypes> Signature;
 
@@ -28,14 +29,11 @@ typedef std::bitset<CoreStatics::MaxNumComponentTypes> Signature;
 class Entity
 {
 public:
-	Entity(class ECSManager* Owner = nullptr) : 
-		EntityID(NumEntities++), 
-		Owner(Owner)
-	{
-		assert(NumEntities < CoreStatics::MaxNumEntities); 
-	}
+	Entity(class ECSManager* Owner = nullptr);
 
 	const unsigned int GetID() const { return EntityID; }
+
+	void Kill() const;
 
 	Entity& operator =(const Entity& Other) = default;
 	bool operator==(const Entity& Other) const { return EntityID == Other.GetID(); }
@@ -128,7 +126,6 @@ protected:
 	template <typename TComponent>
 	void RequireComponent();
 
-private:
 	Signature ComponentSignature;
 	std::vector<Entity> Entities;
 	std::unordered_set<unsigned int> EntityIDs;
@@ -185,6 +182,7 @@ public:
 
 	Entity CreateEntity();
 	void DestroyEntity(const Entity InEntity);
+	std::queue<unsigned int>& GetFreeEntityIDs() { return FreeEntityIDs; }
 
 	unsigned int NumEntities = 0;
 
@@ -251,18 +249,16 @@ private:
 	 */
 	std::set<Entity> EntitiesToBeAdded;
 	std::set<Entity> EntitiesToBeRemoved;
+
+	/**
+	 * Entity IDs of destroyed entities that can now be reused
+	 */
+	 std::queue<unsigned int> FreeEntityIDs;
 };
 
 template <typename TComponent, typename ...TArgs>
 void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 {
-	// Possible TODO: support for entities adding and removing components
-	// in scopes outside of the ones in which they are created
-	// In other words... right now we only add them to systems if they are new
-	// and in the EntitiesToBeAdded structure. If their components change,
-	// we should probably remove them from all current systems and
-	// add them back into that structure to be evaluated again.
-
 	const auto entityID = InEntity.GetID();
 	const auto componentID = Component<TComponent>::GetID();
 

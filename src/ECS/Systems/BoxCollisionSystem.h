@@ -15,5 +15,10 @@ public:
 	void Update(const float DeltaTime) override;
 
 private:
-	const bool DetectCollision(const Entity& A, const Entity& B);
+	const bool DetectCollision(const class BoxColliderComponent& ABox, 
+		const BoxColliderComponent& BBox,
+		const class TransformComponent& ATransform, 
+		const TransformComponent& BTransform);
+
+	void HandleCollision(const Entity& A, const Entity& B);
 };

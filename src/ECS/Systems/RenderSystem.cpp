@@ -6,6 +6,7 @@
 #include "RenderSystem.h"
 #include "ECS/Components/SpriteComponent.h"
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/BoxColliderComponent.h"
 #include <SDL.h>
 #include "Game/Game.h"
 #include "Asset/AssetStore.h"
@@ -29,6 +30,7 @@ void RenderSystem::Update(const float DeltaTime)
 		{
 			const auto& transform = entity.GetComponent<TransformComponent>();
 			const auto& sprite = entity.GetComponent<SpriteComponent>();
+
 			SDL_Texture* texture = assetManager->GetTexture(sprite.AssetID);
 			SDL_Rect sourceRect = sprite.SourceRect;
 			SDL_Rect destRect = {
@@ -39,9 +41,26 @@ void RenderSystem::Update(const float DeltaTime)
 			};
 
 			SDL_RenderCopyEx(renderer, texture, &sourceRect, &destRect, transform.Rotation, nullptr, SDL_FLIP_NONE);
+
+			// Render debug collider shapes
+			if (CoreStatics::IsDebugBuild && 
+				CoreStatics::DrawDebugColliders && 
+				entity.HasComponent<BoxColliderComponent>())
+			{
+				const auto& boxCollider = entity.GetComponent<BoxColliderComponent>();
+				SDL_Rect colliderRect = {
+					static_cast<int>(transform.Position.x + boxCollider.Offset.x),
+					static_cast<int>(transform.Position.y + boxCollider.Offset.y),
+					static_cast<int>(boxCollider.Width),
+					static_cast<int>(boxCollider.Height)
+				};
+
+				SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+				SDL_RenderDrawRect(renderer, &colliderRect);
+			}
 		}
 
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(renderer);		
 	}
 	else
 	{
@@ -53,26 +72,30 @@ void RenderSystem::Update(const float DeltaTime)
 void RenderSystem::AddEntity(const Entity InEntity)
 {
 	const auto zOrder = InEntity.GetComponent<SpriteComponent>().ZOrder;
-	auto& entities = GetEntities();
 
-	if (entities.size() > 0)
+	if (EntityIDs.count(InEntity.GetID()) == 0)
 	{
-		auto it = entities.begin();
+		EntityIDs.insert(InEntity.GetID());
 
-		while (it != entities.end())
+		if (Entities.size() > 0)
 		{
-			if (it->GetComponent<SpriteComponent>().ZOrder >= zOrder)
-			{
-				// Found the first zOrder greater or equal, insert immediately before it
-				break;
-			}
-			++it;
-		}
+			auto it = Entities.begin();
 
-		entities.insert(it, InEntity);
-	}
-	else
-	{
-		entities.push_back(InEntity);
+			while (it != Entities.end())
+			{
+				if (it->GetComponent<SpriteComponent>().ZOrder >= zOrder)
+				{
+					// Found the first zOrder greater or equal, insert immediately before it
+					break;
+				}
+				++it;
+			}
+
+			Entities.insert(it, InEntity);
+		}
+		else
+		{
+			Entities.push_back(InEntity);
+		}
 	}
 }

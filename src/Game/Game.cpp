@@ -48,11 +48,20 @@ void Game::ProcessInput()
 		case SDL_QUIT:
 			IsRunning = false;
 			break;
-			// Debug use escape key to quit everything.
 		case SDL_KEYDOWN:
-			if (sdlEvent.key.keysym.sym == SDLK_ESCAPE && CoreStatics::IsDebugBuild)
+			// Debug-only keybinds
+			if (CoreStatics::IsDebugBuild)
 			{
-				IsRunning = false;
+				// Debug use escape key to quit everything.
+				if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
+				{
+					IsRunning = false;
+				}
+				// Debug use F1 to toggle collider rendering
+				else if (sdlEvent.key.keysym.sym == SDLK_F1)
+				{
+					CoreStatics::DrawDebugColliders = !CoreStatics::DrawDebugColliders;
+				}
 			}
 			break;
 		}

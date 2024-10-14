@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2024 Sean Goldie. All rights reserved
- * sean.writes.code@gmail.com
+ * Copyright (C) 2024 Sean Goldie. All rights reserved.
+ * Contact: sean.writes.code@gmail.com
  */
 
 #include "TestGame.h"

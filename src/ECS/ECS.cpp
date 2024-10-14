@@ -5,7 +5,7 @@
 
 #include "ECS.h"
 
-Entity::Entity(class ECSManager* Owner /*= nullptr*/) : Owner(Owner)
+Entity::Entity(ECSManager* Owner /*= nullptr*/) : Owner(Owner)
 {
     assert(++NumEntities < CoreStatics::MaxNumEntities);
 
@@ -55,11 +55,6 @@ void System::RemoveEntity(const Entity InEntity)
         EntityIDs.erase(entityID);
         Entities.erase(std::find(Entities.begin(), Entities.end(), InEntity));
     }
-}
-
-ECSManager::ECSManager()
-{
-
 }
 
 ECSManager::~ECSManager()
@@ -136,12 +131,7 @@ void ECSManager::UpdateEntityInSystems(const Entity InEntity, const Signature& O
             {
                 system->RemoveEntity(InEntity);
             }
-        }
-
-        for (const auto& [typeIndex, system] : Systems)
-        {
-            const Signature& systemSignature = system->GetComponentSignature();
-            if ((systemSignature & New) == systemSignature)
+            else if ((systemSignature & New) == systemSignature)
             {
                 system->AddEntity(InEntity);
             }

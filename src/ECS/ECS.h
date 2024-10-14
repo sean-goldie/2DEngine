@@ -59,7 +59,7 @@ protected:
     static unsigned int NumEntities; // = 0;
 
 private:
-    unsigned int EntityID;
+    unsigned int EntityID = 0;
     ECSManager* Owner = nullptr;
 };
 
@@ -172,7 +172,7 @@ private:
 class ECSManager
 {
 public:
-    ECSManager();
+    ECSManager() = default;
     ~ECSManager();
 
     void Update(const float DeltaTime);

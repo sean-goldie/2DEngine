@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024 Sean Goldie. All rights reserved
+ * sean.writes.code@gmail.com
+ */
+
 #include "AssetStore.h"
 #include <SDL.h>
 #include <SDL_image.h>

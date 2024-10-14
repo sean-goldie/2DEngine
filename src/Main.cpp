@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024 Sean Goldie. All rights reserved
+ * sean.writes.code@gmail.com
+ */
+
 #ifdef _DEBUG
 #pragma optimize("", off)
 #endif

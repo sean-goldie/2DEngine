@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024 Sean Goldie. All rights reserved
+ * sean.writes.code@gmail.com
+ */
+
 #include "ECS.h"
 
 unsigned int Entity::NumEntities = 0;

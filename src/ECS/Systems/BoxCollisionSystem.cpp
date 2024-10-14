@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024 Sean Goldie. All rights reserved
+ * sean.writes.code@gmail.com
+ */
+
 #include "BoxCollisionSystem.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/BoxColliderComponent.h"

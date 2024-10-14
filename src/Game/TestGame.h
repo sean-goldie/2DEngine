@@ -10,7 +10,7 @@
 class TestGame : public Game
 {
 public:
-	TestGame();
+    TestGame();
 protected:
-	void Setup() override;
+    void Setup() override;
 };

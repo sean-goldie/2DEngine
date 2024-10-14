@@ -18,22 +18,22 @@ class AssetStore;
  */
 struct SDLParameters
 {
-	enum class EWindowedMode 
-	{
-		FullscreenMaxRes = 0,
-		FullscreenOtherRes,
-		Windowed,
-	};
+    enum class EWindowedMode 
+    {
+        FullscreenMaxRes = 0,
+        FullscreenOtherRes,
+        Windowed,
+    };
 
-	EWindowedMode WindowedMode = EWindowedMode::FullscreenMaxRes;
+    EWindowedMode WindowedMode = EWindowedMode::FullscreenMaxRes;
 
-	/** If WindowedMode is FullscreenMaxRes, these will be overwritten with
-	 * the maximum values returned by a query on the display.
-	 */
-	int WindowWidth = 1920;
-	int WindowHeight = 1080;
-	//int WindowWidth = 800;
-	//int WindowHeight = 640;
+    /** If WindowedMode is FullscreenMaxRes, these will be overwritten with
+     * the maximum values returned by a query on the display.
+     */
+    int WindowWidth = 1920;
+    int WindowHeight = 1080;
+    //int WindowWidth = 800;
+    //int WindowHeight = 640;
 };
 
 /**
@@ -44,45 +44,45 @@ struct SDLParameters
 class Game
 {
 public:
-	Game();
+    Game();
 
-	/** Go!! */
-	void Play();
+    /** Go!! */
+    void Play();
 
-	static ECSManager* GetGameManager() { return GameManager; }
-	static AssetStore* GetAssetManager() { return AssetManager; }
-	static SDL_Renderer* GetRenderer() { return SDLRenderer; }
+    static ECSManager* GetGameManager() { return GameManager; }
+    static AssetStore* GetAssetManager() { return AssetManager; }
+    static SDL_Renderer* GetRenderer() { return SDLRenderer; }
 
 protected:
-	/** Generic setup routine. Game-specific logic can be extended in game classes. */
-	virtual void Setup();
+    /** Generic setup routine. Game-specific logic can be extended in game classes. */
+    virtual void Setup();
 
-	/** Generic input routine. Game-specific logic can be extended in game classes. */
-	virtual void ProcessInput();
+    /** Generic input routine. Game-specific logic can be extended in game classes. */
+    virtual void ProcessInput();
 
-	/** Generic update loop. Game-specific logic can be extended in game classes. */
-	virtual void Update(const float DeltaTime);
+    /** Generic update loop. Game-specific logic can be extended in game classes. */
+    virtual void Update(const float DeltaTime);
 
-	/** Generic render loop. Game-specific logic can be extended in game classes. */
-	virtual void Render(const float DeltaTime);
+    /** Generic render loop. Game-specific logic can be extended in game classes. */
+    virtual void Render(const float DeltaTime);
 
-	/** Load a new level using string ID TilemapTextureID and a map file at MapFilePath */
-	void LoadLevel(const std::string& TilemapTextureID, const std::string& MapFilePath);
+    /** Load a new level using string ID TilemapTextureID and a map file at MapFilePath */
+    void LoadLevel(const std::string& TilemapTextureID, const std::string& MapFilePath);
 
-	/** Display parameters. Can be edited from game subclasses of this class. */
-	SDLParameters DisplayParameters;
+    /** Display parameters. Can be edited from game subclasses of this class. */
+    SDLParameters DisplayParameters;
 
-	static ECSManager* GameManager;
-	static AssetStore* AssetManager;
-	static SDL_Renderer* SDLRenderer;
-
-private:
-	void Initialize();
-	void Run();
-	void Destroy();
+    static ECSManager* GameManager;
+    static AssetStore* AssetManager;
+    static SDL_Renderer* SDLRenderer;
 
 private:
-	bool IsRunning = false;
-	SDL_Window* SDLWindow = nullptr;
-	unsigned int MillisecsPreviousFrame = 0;
+    void Initialize();
+    void Run();
+    void Destroy();
+
+private:
+    bool IsRunning = false;
+    SDL_Window* SDLWindow = nullptr;
+    unsigned int MillisecsPreviousFrame = 0;
 };

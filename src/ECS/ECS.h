@@ -29,38 +29,38 @@ typedef std::bitset<CoreStatics::MaxNumComponentTypes> Signature;
 class Entity
 {
 public:
-	Entity(class ECSManager* Owner = nullptr);
+    Entity(class ECSManager* Owner = nullptr);
 
-	const unsigned int GetID() const { return EntityID; }
+    const unsigned int GetID() const { return EntityID; }
 
-	void Kill() const;
+    void Kill() const;
 
-	Entity& operator =(const Entity& Other) = default;
-	bool operator==(const Entity& Other) const { return EntityID == Other.GetID(); }
-	bool operator<(const Entity& Other) const { return EntityID < Other.GetID(); }
-	bool operator>(const Entity& Other) const { return EntityID > Other.GetID(); }
+    Entity& operator =(const Entity& Other) = default;
+    bool operator==(const Entity& Other) const { return EntityID == Other.GetID(); }
+    bool operator<(const Entity& Other) const { return EntityID < Other.GetID(); }
+    bool operator>(const Entity& Other) const { return EntityID > Other.GetID(); }
 
-	/**
-	 * Optional params are forwarded to the constructor of TComponent.
-	 */
-	template <typename TComponent, typename ...TArgs>
-	void AddComponent(TArgs&& ...Args);
+    /**
+     * Optional params are forwarded to the constructor of TComponent.
+     */
+    template <typename TComponent, typename ...TArgs>
+    void AddComponent(TArgs&& ...Args);
 
-	template <typename TComponent>
-	void RemoveComponent();
+    template <typename TComponent>
+    void RemoveComponent();
 
-	template <typename TComponent>
-	const bool HasComponent() const;
+    template <typename TComponent>
+    const bool HasComponent() const;
 
-	template <typename TComponent>
-	TComponent& GetComponent() const;
+    template <typename TComponent>
+    TComponent& GetComponent() const;
 
 protected:
-	static unsigned int NumEntities; // = 0;
+    static unsigned int NumEntities; // = 0;
 
 private:
-	unsigned int EntityID;
-	ECSManager* Owner = nullptr;
+    unsigned int EntityID;
+    ECSManager* Owner = nullptr;
 };
 
 /**
@@ -72,7 +72,7 @@ private:
 class IComponent
 {
 protected:
-	static unsigned int NumComponentTypes; // = 0;
+    static unsigned int NumComponentTypes; // = 0;
 };
 
 /**
@@ -96,16 +96,16 @@ protected:
 class Component : IComponent
 {
 public:
-	Component() 
-	{
-		assert(NumComponentTypes + 1 < CoreStatics::MaxNumComponentTypes); 
-	}
+    Component() 
+    {
+        assert(NumComponentTypes + 1 < CoreStatics::MaxNumComponentTypes); 
+    }
 
-	static unsigned int GetID()
-	{ 
-		static auto ComponentID = NumComponentTypes++;
-		return ComponentID;
-	}
+    static unsigned int GetID()
+    { 
+        static auto ComponentID = NumComponentTypes++;
+        return ComponentID;
+    }
 };
 
 /**
@@ -114,21 +114,21 @@ public:
 class System
 {
 public:
-	virtual void AddEntity(const Entity EntityToAdd);
-	void RemoveEntity(const Entity EntityToRemove);
+    virtual void AddEntity(const Entity EntityToAdd);
+    void RemoveEntity(const Entity EntityToRemove);
 
-	std::vector<Entity>& GetEntities() { return Entities; }
-	const Signature& GetComponentSignature() const { return ComponentSignature; }
+    std::vector<Entity>& GetEntities() { return Entities; }
+    const Signature& GetComponentSignature() const { return ComponentSignature; }
 
-	virtual void Update(const float DeltaTime) = 0;
+    virtual void Update(const float DeltaTime) = 0;
 
 protected:
-	template <typename TComponent>
-	void RequireComponent();
+    template <typename TComponent>
+    void RequireComponent();
 
-	Signature ComponentSignature;
-	std::vector<Entity> Entities;
-	std::unordered_set<unsigned int> EntityIDs;
+    Signature ComponentSignature;
+    std::vector<Entity> Entities;
+    std::unordered_set<unsigned int> EntityIDs;
 };
 
 /**
@@ -137,7 +137,7 @@ protected:
 class IPool
 {
 public:
-	virtual ~IPool() = default;
+    virtual ~IPool() = default;
 };
 
 /**
@@ -147,21 +147,21 @@ template <typename T>
 class Pool : public IPool
 {
 public:
-	 Pool(const unsigned int size = 100) { Data.resize(size); }
-	 virtual ~Pool() = default;
+     Pool(const unsigned int size = 100) { Data.resize(size); }
+     virtual ~Pool() = default;
 
-	 const bool Empty() const { return Data.empty(); }
-	 const int Size() const { return Data.size(); }
-	 void Resize(const unsigned int Size) { Data.resize(Size); }
-	 void Clear() { Data.clear(); }
-	 void Push(T Object) { Data.push_back(Object); }
-	 void Insert(const int Idx, T& Object) { Data.insert(Data.begin() + Idx, Object); }
-	 void Erase(const unsigned int Idx) { Data.erase(Idx); }
-	 T& Get(const int Idx) { return Data[Idx]; }
-	 void operator[](unsigned int Idx) { return Data[Idx]; }
+     const bool Empty() const { return Data.empty(); }
+     const int Size() const { return Data.size(); }
+     void Resize(const unsigned int Size) { Data.resize(Size); }
+     void Clear() { Data.clear(); }
+     void Push(T Object) { Data.push_back(Object); }
+     void Insert(const int Idx, T& Object) { Data.insert(Data.begin() + Idx, Object); }
+     void Erase(const unsigned int Idx) { Data.erase(Idx); }
+     T& Get(const int Idx) { return Data[Idx]; }
+     void operator[](unsigned int Idx) { return Data[Idx]; }
 
 private:
-	std::vector<T> Data;
+    std::vector<T> Data;
 };
 
 /**
@@ -172,266 +172,266 @@ private:
 class ECSManager
 {
 public:
-	ECSManager();
-	~ECSManager();
+    ECSManager();
+    ~ECSManager();
 
-	void Update(const float DeltaTime);
+    void Update(const float DeltaTime);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Entity Management
+    ////////////////////////////////////////////////////////////////////////////////
+    // Entity Management
 
-	Entity CreateEntity();
-	void DestroyEntity(const Entity InEntity);
-	std::queue<unsigned int>& GetFreeEntityIDs() { return FreeEntityIDs; }
+    Entity CreateEntity();
+    void DestroyEntity(const Entity InEntity);
+    std::queue<unsigned int>& GetFreeEntityIDs() { return FreeEntityIDs; }
 
-	unsigned int NumEntities = 0;
+    unsigned int NumEntities = 0;
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Component Management
+    ////////////////////////////////////////////////////////////////////////////////
+    // Component Management
 
-	/**
-	 * Optional params after InEntity are forwarded to the constructor of TComponent.
-	 * Make sure they are present and correct if TComponent's constructor
-	 * does not have defaults!
-	 */
-	template <typename TComponent, typename ...TArgs>
-	void AddComponent(Entity InEntity, TArgs&& ...Args);
+    /**
+     * Optional params after InEntity are forwarded to the constructor of TComponent.
+     * Make sure they are present and correct if TComponent's constructor
+     * does not have defaults!
+     */
+    template <typename TComponent, typename ...TArgs>
+    void AddComponent(Entity InEntity, TArgs&& ...Args);
 
-	template <typename TComponent>
-	const bool HasComponent(const Entity InEntity) const;
-	
-	template <typename TComponent>
-	void RemoveComponent(Entity InEntity);
+    template <typename TComponent>
+    const bool HasComponent(const Entity InEntity) const;
+    
+    template <typename TComponent>
+    void RemoveComponent(Entity InEntity);
 
-	template <typename TComponent>
-	TComponent& GetComponent(const Entity InEntity);
+    template <typename TComponent>
+    TComponent& GetComponent(const Entity InEntity);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// System Management
+    ////////////////////////////////////////////////////////////////////////////////
+    // System Management
 
-	/**
-	 * Optional params are forwarded to the constructor of TSystem.
-	 */
-	template <typename TSystem, typename ...TArgs>
-	void AddSystem(TArgs&& ...Args);
+    /**
+     * Optional params are forwarded to the constructor of TSystem.
+     */
+    template <typename TSystem, typename ...TArgs>
+    void AddSystem(TArgs&& ...Args);
 
-	template <typename TSystem>
-	void RemoveSystem();
+    template <typename TSystem>
+    void RemoveSystem();
 
-	template <typename TSystem>
-	const bool HasSystem() const;
+    template <typename TSystem>
+    const bool HasSystem() const;
 
-	template <typename TSystem>
-	TSystem* GetSystem() const;
+    template <typename TSystem>
+    TSystem* GetSystem() const;
 
 private:
-	void AddEntityToSystems(const Entity InEntity);
-	void RemoveEntityFromSystems(const Entity InEntity);
-	void UpdateEntityInSystems(const Entity InEntity, const Signature& Old, const Signature& New);
+    void AddEntityToSystems(const Entity InEntity);
+    void RemoveEntityFromSystems(const Entity InEntity);
+    void UpdateEntityInSystems(const Entity InEntity, const Signature& Old, const Signature& New);
 
-	/**
-	 * Index indicates ComponentID, value is that component's pool (of entities with that component)
-	 */
-	std::vector<IPool*> ComponentPools;
+    /**
+     * Index indicates ComponentID, value is that component's pool (of entities with that component)
+     */
+    std::vector<IPool*> ComponentPools;
 
-	/**
-	 * Index indicates EntityID, value is that entity's signature
-	 */
-	std::vector<Signature> EntityComponentSignatures;
+    /**
+     * Index indicates EntityID, value is that entity's signature
+     */
+    std::vector<Signature> EntityComponentSignatures;
 
-	/**
-	 * TODO: refactor to use vector, not sure this implementation makes sense
-	 */
-	 std::unordered_map<std::type_index, System*> Systems;
+    /**
+     * TODO: refactor to use vector, not sure this implementation makes sense
+     */
+     std::unordered_map<std::type_index, System*> Systems;
 
-	/** 
-	 * Entities flagged to be added or removed in the next Update() call 
-	 */
-	std::set<Entity> EntitiesToBeAdded;
-	std::set<Entity> EntitiesToBeRemoved;
+    /** 
+     * Entities flagged to be added or removed in the next Update() call 
+     */
+    std::set<Entity> EntitiesToBeAdded;
+    std::set<Entity> EntitiesToBeRemoved;
 
-	/**
-	 * Entity IDs of destroyed entities that can now be reused
-	 */
-	 std::queue<unsigned int> FreeEntityIDs;
+    /**
+     * Entity IDs of destroyed entities that can now be reused
+     */
+     std::queue<unsigned int> FreeEntityIDs;
 };
 
 template <typename TComponent, typename ...TArgs>
 void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
 {
-	const auto entityID = InEntity.GetID();
-	const auto componentID = Component<TComponent>::GetID();
+    const auto entityID = InEntity.GetID();
+    const auto componentID = Component<TComponent>::GetID();
 
-	// Bounds check on the array of pools, allocate nullptrs as needed
-	if (componentID >= ComponentPools.size())
-	{
-		const auto newSize = (ComponentPools.size() > 0) ? ComponentPools.size() * 2 : 32;
-		ComponentPools.resize(newSize, nullptr);
-	}
+    // Bounds check on the array of pools, allocate nullptrs as needed
+    if (componentID >= ComponentPools.size())
+    {
+        const auto newSize = (ComponentPools.size() > 0) ? ComponentPools.size() * 2 : 32;
+        ComponentPools.resize(newSize, nullptr);
+    }
 
-	// If we needed to add nullptrs, allocate a new Pool and store it
-	if (ComponentPools[componentID] == nullptr)
-	{
-		ComponentPools[componentID] = new Pool<TComponent>();
-	}
+    // If we needed to add nullptrs, allocate a new Pool and store it
+    if (ComponentPools[componentID] == nullptr)
+    {
+        ComponentPools[componentID] = new Pool<TComponent>();
+    }
 
-	Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>((ComponentPools[componentID]));
+    Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>((ComponentPools[componentID]));
 
-	// Bounds check on this particular pool
-	if (entityID >= static_cast<unsigned int>(componentPool->Size())) // blah warning blah
-	{
-		if (entityID > 0)
-		{
-			componentPool->Resize(entityID * 2);
-		}
-		else
-		{
-			componentPool->Resize(32);
-		}
-	}
+    // Bounds check on this particular pool
+    if (entityID >= static_cast<unsigned int>(componentPool->Size())) // blah warning blah
+    {
+        if (entityID > 0)
+        {
+            componentPool->Resize(entityID * 2);
+        }
+        else
+        {
+            componentPool->Resize(32);
+        }
+    }
 
-	// Make a new component to assign to the entity, forwarding constructor args if they are present
-	TComponent newComponent(std::forward<TArgs>(Args)...);
+    // Make a new component to assign to the entity, forwarding constructor args if they are present
+    TComponent newComponent(std::forward<TArgs>(Args)...);
 
-	// Assign it to the entity (in this component type's pool, at this entity ID's index)
-	componentPool->Insert(entityID, newComponent);
+    // Assign it to the entity (in this component type's pool, at this entity ID's index)
+    componentPool->Insert(entityID, newComponent);
 
-	if (entityID >= EntityComponentSignatures.size())
-	{
-		if (entityID > 0)
-		{
-			EntityComponentSignatures.resize(entityID * 2);
-		}
-		else
-		{
-			EntityComponentSignatures.resize(32);
-		}
-	}
+    if (entityID >= EntityComponentSignatures.size())
+    {
+        if (entityID > 0)
+        {
+            EntityComponentSignatures.resize(entityID * 2);
+        }
+        else
+        {
+            EntityComponentSignatures.resize(32);
+        }
+    }
 
-	// Capture the old signature
-	const Signature oldEntitySignature = EntityComponentSignatures[entityID];
+    // Capture the old signature
+    const Signature oldEntitySignature = EntityComponentSignatures[entityID];
 
-	// Update the entity's signature to indicate that this component is assigned to this entity
-	const Signature newEntitySignature = EntityComponentSignatures[entityID].set(componentID);
+    // Update the entity's signature to indicate that this component is assigned to this entity
+    const Signature newEntitySignature = EntityComponentSignatures[entityID].set(componentID);
 
-	UpdateEntityInSystems(InEntity, oldEntitySignature, newEntitySignature);
+    UpdateEntityInSystems(InEntity, oldEntitySignature, newEntitySignature);
 
-	Logger::LogMessage(
-		"Component " + std::to_string(componentID) + 
-		" added to entity " + std::to_string(entityID));
+    Logger::LogMessage(
+        "Component " + std::to_string(componentID) + 
+        " added to entity " + std::to_string(entityID));
 }
 
 template <typename TComponent>
 const bool ECSManager::HasComponent(const Entity InEntity) const
 {
-	assert(InEntity.GetID() < EntityComponentSignatures.size());
-	return EntityComponentSignatures[InEntity.GetID()].test(Component<TComponent>::GetID());
+    assert(InEntity.GetID() < EntityComponentSignatures.size());
+    return EntityComponentSignatures[InEntity.GetID()].test(Component<TComponent>::GetID());
 }
 
 template <typename TComponent>
 void ECSManager::RemoveComponent(Entity InEntity)
 {
-	assert(InEntity.GetID() < EntityComponentSignatures.size());
+    assert(InEntity.GetID() < EntityComponentSignatures.size());
 
-	const auto entityID = InEntity.GetID();
-	const Signature oldSignature = EntityComponentSignatures[entityID];
-	const Signature newSignature = EntityComponentSignatures[entityID].set(Component<TComponent>::GetID(), false);
+    const auto entityID = InEntity.GetID();
+    const Signature oldSignature = EntityComponentSignatures[entityID];
+    const Signature newSignature = EntityComponentSignatures[entityID].set(Component<TComponent>::GetID(), false);
 
-	UpdateEntityInSystems(InEntity, oldSignature, newSignature);
+    UpdateEntityInSystems(InEntity, oldSignature, newSignature);
 }
 
 template <typename TComponent>
 TComponent& ECSManager::GetComponent(const Entity InEntity)
 {
-	assert(HasComponent<TComponent>(InEntity));
-	const auto entityId = InEntity.GetID();
-	const auto componentId = Component<TComponent>::GetID();
+    assert(HasComponent<TComponent>(InEntity));
+    const auto entityId = InEntity.GetID();
+    const auto componentId = Component<TComponent>::GetID();
 
-	Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>((ComponentPools[componentId]));
+    Pool<TComponent>* componentPool = static_cast<Pool<TComponent>*>((ComponentPools[componentId]));
 
-	return componentPool->Get(entityId);
+    return componentPool->Get(entityId);
 }
 
 template <typename TSystem, typename ...TArgs>
 void ECSManager::AddSystem(TArgs&& ...Args)
 {
-	const auto systemIdx = std::type_index(typeid(TSystem));
+    const auto systemIdx = std::type_index(typeid(TSystem));
 
-	if (Systems.count(systemIdx) == 0)
-	{
-		Systems[systemIdx] = new TSystem(std::forward<TArgs>(Args)...);
-	}
+    if (Systems.count(systemIdx) == 0)
+    {
+        Systems[systemIdx] = new TSystem(std::forward<TArgs>(Args)...);
+    }
 }
 
 template <typename TSystem>
 void ECSManager::RemoveSystem()
 {
-	const auto systemIdx = std::type_index(typeid(TSystem));
-	
-	if (Systems.count(systemIdx))
-	{
-		Systems.erase(systemIdx);
-	}
+    const auto systemIdx = std::type_index(typeid(TSystem));
+    
+    if (Systems.count(systemIdx))
+    {
+        Systems.erase(systemIdx);
+    }
 }
 
 template <typename TSystem>
 const bool ECSManager::HasSystem() const
 {
-	const auto systemIdx = std::type_index(typeid(TSystem));
-	return Systems.count(systemIdx);
+    const auto systemIdx = std::type_index(typeid(TSystem));
+    return Systems.count(systemIdx);
 }
 
 template <typename TSystem>
 TSystem* ECSManager::GetSystem() const
 {
-	const auto systemIdx = std::type_index(typeid(TSystem));
-	const auto systemItr = Systems.find(systemIdx);
+    const auto systemIdx = std::type_index(typeid(TSystem));
+    const auto systemItr = Systems.find(systemIdx);
 
-	if (systemItr != Systems.end())
-	{
-		const auto& pair = *systemItr;
+    if (systemItr != Systems.end())
+    {
+        const auto& pair = *systemItr;
 
-		if (pair.second != nullptr)
-		{
-			return static_cast<TSystem*>(pair.second);
-		}
-	}
-	
-	return nullptr;
+        if (pair.second != nullptr)
+        {
+            return static_cast<TSystem*>(pair.second);
+        }
+    }
+    
+    return nullptr;
 }
 
 template <typename TComponent>
 void System::RequireComponent()
 {
-	ComponentSignature.set(Component<TComponent>::GetID());
+    ComponentSignature.set(Component<TComponent>::GetID());
 }
 
 
 template <typename TComponent, typename ...TArgs>
 void Entity::AddComponent(TArgs&& ...Args)
 {
-	assert(Owner != nullptr);
-	Owner->AddComponent<TComponent>(*this, std::forward<TArgs>(Args)...);
+    assert(Owner != nullptr);
+    Owner->AddComponent<TComponent>(*this, std::forward<TArgs>(Args)...);
 
 }
 
 template <typename TComponent>
 void Entity::RemoveComponent()
 {
-	assert(Owner != nullptr);
-	Owner->RemoveComponent<TComponent>(*this);
+    assert(Owner != nullptr);
+    Owner->RemoveComponent<TComponent>(*this);
 }
 
 template <typename TComponent>
 const bool Entity::HasComponent() const
 {
-	assert(Owner != nullptr);
-	return Owner->HasComponent<TComponent>(*this);
+    assert(Owner != nullptr);
+    return Owner->HasComponent<TComponent>(*this);
 }
 
 template <typename TComponent>
 TComponent& Entity::GetComponent() const
 {
-	assert(Owner != nullptr);
-	return Owner->GetComponent<TComponent>(*this);
+    assert(Owner != nullptr);
+    return Owner->GetComponent<TComponent>(*this);
 }

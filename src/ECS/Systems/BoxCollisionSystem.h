@@ -10,15 +10,15 @@
 class BoxCollisionSystem : public System 
 {
 public:
-	BoxCollisionSystem();
+    BoxCollisionSystem();
 
-	void Update(const float DeltaTime) override;
+    void Update(const float DeltaTime) override;
 
 private:
-	const bool DetectCollision(const class BoxColliderComponent& ABox, 
-		const BoxColliderComponent& BBox,
-		const class TransformComponent& ATransform, 
-		const TransformComponent& BTransform);
+    const bool DetectCollision(const class BoxColliderComponent& ABox, 
+        const BoxColliderComponent& BBox,
+        const class TransformComponent& ATransform, 
+        const TransformComponent& BTransform);
 
-	void HandleCollision(const Entity& A, const Entity& B);
+    void HandleCollision(const Entity& A, const Entity& B);
 };

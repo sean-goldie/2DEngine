@@ -11,7 +11,7 @@
 class RigidBodyComponent : public Component<RigidBodyComponent>
 {
 public:
-	RigidBodyComponent(Vector2 Velocity = Vector2(0.0, 0.0)) : Velocity(Velocity) {}
+    RigidBodyComponent(Vector2 Velocity = Vector2(0.0, 0.0)) : Velocity(Velocity) {}
 
-	Vector2 Velocity;
+    Vector2 Velocity;
 };

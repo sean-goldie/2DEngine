@@ -10,8 +10,8 @@
 class RenderSystem : public System 
 {
 public:
-	RenderSystem();
+    RenderSystem();
 
-	void Update(const float DeltaTime) override;
-	void AddEntity(const Entity InEntity) override;
+    void Update(const float DeltaTime) override;
+    void AddEntity(const Entity InEntity) override;
 };

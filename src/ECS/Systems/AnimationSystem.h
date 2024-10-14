@@ -10,6 +10,6 @@
 class AnimationSystem : public System
 {
 public:
-	AnimationSystem();
-	void Update(const float DeltaTime) override;
+    AnimationSystem();
+    void Update(const float DeltaTime) override;
 };

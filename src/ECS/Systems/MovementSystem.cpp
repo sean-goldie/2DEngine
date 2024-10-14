@@ -9,23 +9,23 @@
 
 MovementSystem::MovementSystem()
 {
-	RequireComponent<TransformComponent>();
-	RequireComponent<RigidBodyComponent>();
+    RequireComponent<TransformComponent>();
+    RequireComponent<RigidBodyComponent>();
 }
 
 void MovementSystem::Update(const float DeltaTime)
 {
-	for (const Entity& entity : GetEntities())
-	{
-		auto& transform = entity.GetComponent<TransformComponent>();
-		const auto& rigidBody = entity.GetComponent<RigidBodyComponent>();
+    for (const Entity& entity : GetEntities())
+    {
+        auto& transform = entity.GetComponent<TransformComponent>();
+        const auto& rigidBody = entity.GetComponent<RigidBodyComponent>();
 
-		transform.Position.x += rigidBody.Velocity.x * DeltaTime;
-		transform.Position.y += rigidBody.Velocity.y * DeltaTime;
-	}
+        transform.Position.x += rigidBody.Velocity.x * DeltaTime;
+        transform.Position.y += rigidBody.Velocity.y * DeltaTime;
+    }
 }
 
 void MovementSystem::AddVelocity(const float X, const float Y)
 {
-	
+    
 }

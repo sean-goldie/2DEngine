@@ -7,11 +7,19 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/BoxColliderComponent.h"
 #include "ECS/Components/RigidBodyComponent.h"
+#include "Game/Game.h"
+#include "EventBus/EventBus.h"
+#include "Event/CollisionEvent.h"
 
 BoxCollisionSystem::BoxCollisionSystem()
 {
     RequireComponent<TransformComponent>();
     RequireComponent<BoxColliderComponent>();
+
+    if (auto* eventManager = Game::GetEventManager())
+    {
+        eventManager->RegisterHandler<BoxCollisionSystem, CollisionEvent>(this, &BoxCollisionSystem::TestCallback);
+    }
 }
 
 void BoxCollisionSystem::Update(const float DeltaTime)
@@ -80,7 +88,13 @@ const bool BoxCollisionSystem::DetectCollision(
 
 void BoxCollisionSystem::HandleCollision(const Entity& A, const Entity& B)
 {
-    Logger::LogWarning("Collision detected!");
-    A.Kill();
-    B.Kill();
+    if (auto* eventManager = Game::GetEventManager())
+    {
+        eventManager->EmitEvent<CollisionEvent>(A, B);
+    }
+}
+
+void BoxCollisionSystem::TestCallback(CollisionEvent& Event)
+{
+    Logger::LogWarning("Got the callback!");
 }

@@ -9,6 +9,7 @@
 #include "Game.h"
 #include "Asset/AssetStore.h"
 #include "Util/CoreStatics.h"
+#include "EventBus/EventBus.h"
 #include "ECS/Systems/RenderSystem.h" // includes ECS.h
 #include "glm/glm.hpp"
 #include "ECS/Components/TransformComponent.h"
@@ -17,11 +18,13 @@
 ECSManager* Game::GameManager = nullptr;
 AssetStore* Game::AssetManager = nullptr;
 SDL_Renderer* Game::SDLRenderer = nullptr;
+EventBus* Game::EventManager = nullptr;
 
 Game::Game()
 {
     GameManager = new ECSManager;
     AssetManager = new AssetStore;
+    EventManager = new EventBus;
 }
 
 void Game::Play()
@@ -258,4 +261,5 @@ void Game::Destroy()
 
     delete GameManager;
     delete AssetManager;
+    delete EventManager;
 }

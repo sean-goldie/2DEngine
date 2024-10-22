@@ -12,6 +12,7 @@ struct SDL_Window;
 struct SDL_Renderer;
 class ECSManager;
 class AssetStore;
+class EventBus;
 
 /**
  * Rendering settings. Fullscreen mode is enabled by default.
@@ -50,6 +51,7 @@ public:
     static ECSManager* GetGameManager() { return GameManager; }
     static AssetStore* GetAssetManager() { return AssetManager; }
     static SDL_Renderer* GetRenderer() { return SDLRenderer; }
+    static EventBus* GetEventManager() { return EventManager; }
 
 protected:
     /** Generic setup routine. Game-specific logic can be extended in game classes. */
@@ -73,6 +75,7 @@ protected:
     static ECSManager* GameManager;
     static AssetStore* AssetManager;
     static SDL_Renderer* SDLRenderer;
+    static EventBus* EventManager;
 
 private:
     void Initialize();

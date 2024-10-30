@@ -20,9 +20,6 @@
 class IEventCallback
 {
 public:
-    IEventCallback() = default;
-    virtual ~IEventCallback() = 0;
-
     void Execute(Event EventToExecute)
     {
         Call(EventToExecute);
@@ -47,11 +44,8 @@ public:
     EventCallback(THandler* Handler = nullptr, CallbackFunction Callback = nullptr)
         : Handler(Handler), Callback(Callback) {}
 
-    ~EventCallback() override = default;
-
 private:
     CallbackFunction Callback;
-
     THandler* Handler;
 
 protected:
@@ -76,7 +70,7 @@ public:
     }
 
     template <typename THandler, typename TEvent>
-    void RegisterHandler(const THandler* Handler, void (THandler::* CallbackFunction)(TEvent&))
+    void RegisterHandler(THandler* Handler, void (THandler::* CallbackFunction)(TEvent&))
     {
         const auto typeID = std::type_index(typeid(TEvent));
         const auto newCallback = new EventCallback<THandler, TEvent>(Handler, CallbackFunction);

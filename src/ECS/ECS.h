@@ -315,10 +315,6 @@ void ECSManager::AddComponent(Entity InEntity, TArgs&& ...Args)
     const Signature newEntitySignature = EntityComponentSignatures[entityID].set(componentID);
 
     UpdateEntityInSystems(InEntity, oldEntitySignature, newEntitySignature);
-
-    Logger::LogMessage(
-        "Component " + std::to_string(componentID) + 
-        " added to entity " + std::to_string(entityID));
 }
 
 template <typename TComponent>

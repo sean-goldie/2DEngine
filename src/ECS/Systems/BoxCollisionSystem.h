@@ -7,8 +7,6 @@
 
 #include "ECS/ECS.h"
 
-class CollisionEvent;
-
 class BoxCollisionSystem : public System 
 {
 public:
@@ -23,6 +21,4 @@ private:
         const TransformComponent& BTransform);
 
     void HandleCollision(const Entity& A, const Entity& B);
-
-    void TestCallback(CollisionEvent& Event);
 };

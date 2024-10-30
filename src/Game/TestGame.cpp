@@ -13,6 +13,7 @@
 #include "ECS/Components/RigidBodyComponent.h"
 #include "ECS/Components/SpriteComponent.h"
 #include "ECS/Components/BoxColliderComponent.h"
+#include "ECS/Systems/DamageSystem.h"
 #include "Asset/AssetStore.h"
 
 TestGame::TestGame()
@@ -29,6 +30,7 @@ void TestGame::Setup()
     GameManager->AddSystem<RenderSystem>();
     GameManager->AddSystem<AnimationSystem>();
     GameManager->AddSystem<BoxCollisionSystem>();
+    GameManager->AddSystem<DamageSystem>();
 
     const std::string tilemapDir = "./assets/tilemaps/";
 

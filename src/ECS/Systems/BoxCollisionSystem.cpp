@@ -15,11 +15,6 @@ BoxCollisionSystem::BoxCollisionSystem()
 {
     RequireComponent<TransformComponent>();
     RequireComponent<BoxColliderComponent>();
-
-    if (auto* eventManager = Game::GetEventManager())
-    {
-        eventManager->RegisterHandler<BoxCollisionSystem, CollisionEvent>(this, &BoxCollisionSystem::TestCallback);
-    }
 }
 
 void BoxCollisionSystem::Update(const float DeltaTime)
@@ -92,9 +87,4 @@ void BoxCollisionSystem::HandleCollision(const Entity& A, const Entity& B)
     {
         eventManager->EmitEvent<CollisionEvent>(A, B);
     }
-}
-
-void BoxCollisionSystem::TestCallback(CollisionEvent& Event)
-{
-    Logger::LogWarning("Got the callback!");
 }

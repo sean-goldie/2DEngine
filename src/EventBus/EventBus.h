@@ -44,6 +44,8 @@ public:
     EventCallback(THandler* Handler = nullptr, CallbackFunction Callback = nullptr)
         : Handler(Handler), Callback(Callback) {}
 
+    THandler* GetHandler() const { return Handler; }
+
 private:
     CallbackFunction Callback;
     THandler* Handler;
@@ -82,6 +84,27 @@ public:
         else
         {
             HandlerMap[typeID] = std::list<IEventCallback*>{ newCallback };
+        }
+    }
+
+    template <typename THandler, typename TEvent>
+    void UnRegisterHandler(THandler* Handler)
+    {
+        const auto typeID = std::type_index(typeid(TEvent));
+
+        if (HandlerMap.count(typeID))
+        {
+            for (IEventCallback* callback : HandlerMap[typeID])
+            {
+                if (auto* castedCallback = static_cast<EventCallback<THandler, TEvent>*>(callback))
+                {
+                    if (castedCallback->GetHandler() == Handler)
+                    {
+                        HandlerMap[typeID].remove(callback);
+                        return;
+                    }
+                }
+            }
         }
     }
 
